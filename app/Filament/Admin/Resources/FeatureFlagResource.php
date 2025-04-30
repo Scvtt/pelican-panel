@@ -19,7 +19,6 @@ class FeatureFlagResource extends Resource
 
     protected static ?string $navigationIcon = 'tabler-flag';
     protected static ?string $navigationGroup = 'Server';
-    protected static ?int $navigationSort = 2;
 
     public static function getNavigationLabel(): string
     {
