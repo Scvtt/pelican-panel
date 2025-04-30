@@ -17,7 +17,7 @@ class FeatureFlagResource extends Resource
 {
     protected static ?string $model = FeatureFlag::class;
 
-    protected static ?string $navigationIcon = 'tabler-tool';
+    protected static ?string $navigationIcon = 'tabler-flag';
     protected static ?string $navigationGroup = 'Server';
     protected static ?int $navigationSort = 2;
 
