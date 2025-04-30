@@ -50,13 +50,12 @@ class ModManagerResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('egg.name')->label('Egg')->sortable()->searchable(),
-                Tables\Columns\IconColumn::make('enabled')->boolean()->label('Enabled'),
+                Tables\Columns\ToggleColumn::make('enabled')->label('Enabled'),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -78,7 +77,6 @@ class ModManagerResource extends Resource
         return [
             'index' => Pages\ListModManagers::route('/'),
             'create' => Pages\CreateModManager::route('/create'),
-            'view' => Pages\ViewModManager::route('/{record}'),
             'edit' => Pages\EditModManager::route('/{record}/edit'),
         ];
     }
