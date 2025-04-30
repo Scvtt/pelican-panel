@@ -92,7 +92,7 @@ class FeatureFlagResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->emptyStateIcon('tabler-tool')
+            ->emptyStateIcon('tabler-flag')
             ->emptyStateHeading('No Feature Flags')
             ->emptyStateDescription('')
             ->emptyStateActions([
