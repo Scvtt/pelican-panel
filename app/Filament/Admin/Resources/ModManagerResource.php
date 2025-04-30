@@ -65,21 +65,21 @@ class ModManagerResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\BulkAction::make('enable')
-                        ->label('Enable Selected')
+                        ->label('Enable selected')
                         ->icon('tabler-toggle-right')
                         ->color('success')
                         ->action(function ($records) {
                             $records->each->update(['enabled' => true]);
                         }),
                     Tables\Actions\BulkAction::make('disable')
-                        ->label('Disable Selected')
+                        ->label('Disable selected')
                         ->icon('tabler-toggle-left')
                         ->color('danger')
                         ->action(function ($records) {
                             $records->each->update(['enabled' => false]);
                         }),
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
