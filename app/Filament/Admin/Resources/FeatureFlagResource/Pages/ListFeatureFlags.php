@@ -13,7 +13,32 @@ class ListFeatureFlags extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('New Feature Flag'),
         ];
+    }
+    
+    protected function getEmptyStateHeading(): string
+    {
+        return 'No Feature Flags';
+    }
+    
+    protected function getEmptyStateDescription(): ?string
+    {
+        return '';
+    }
+    
+    protected function getEmptyStateActions(): array
+    {
+        return [
+            Actions\CreateAction::make()
+                ->label('New Feature Flag')
+                ->icon('tabler-plus'),
+        ];
+    }
+    
+    protected function isTableSearchable(): bool
+    {
+        return $this->getTableQuery()->count() > 0;
     }
 } 

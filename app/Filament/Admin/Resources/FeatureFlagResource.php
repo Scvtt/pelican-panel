@@ -26,6 +26,16 @@ class FeatureFlagResource extends Resource
         return 'Feature Flags';
     }
 
+    public static function getModelLabel(): string
+    {
+        return 'Feature Flag';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Feature Flags';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
