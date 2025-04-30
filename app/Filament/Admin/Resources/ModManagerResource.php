@@ -54,7 +54,8 @@ class ModManagerResource extends Resource
                 Tables\Columns\TextColumn::make('eggs.name')
                     ->label('Eggs')
                     ->listWithLineBreaks()
-                    ->bulleted(),
+                    ->bulleted()
+                    ->formatStateUsing(fn ($state, $record) => $record->eggs->pluck('name')->toArray()),
                 Tables\Columns\ToggleColumn::make('enabled')->label('Enabled'),
             ])
             ->filters([

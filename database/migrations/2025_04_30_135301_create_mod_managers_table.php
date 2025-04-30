@@ -19,8 +19,12 @@ return new class extends Migration
         });
 
         Schema::create('egg_mod_manager', function (Blueprint $table) {
-            $table->foreignId('egg_id')->constrained()->onDelete('cascade');
-            $table->foreignId('mod_manager_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('egg_id');
+            $table->unsignedBigInteger('mod_manager_id');
+            
+            $table->foreign('egg_id')->references('id')->on('eggs')->onDelete('cascade');
+            $table->foreign('mod_manager_id')->references('id')->on('mod_managers')->onDelete('cascade');
+            
             $table->primary(['egg_id', 'mod_manager_id']);
         });
     }
