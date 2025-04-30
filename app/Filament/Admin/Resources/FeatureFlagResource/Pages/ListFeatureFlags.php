@@ -14,7 +14,8 @@ class ListFeatureFlags extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('New Feature Flag'),
+                ->label('New Feature Flag')
+                ->hidden(fn () => $this->getTableQuery()->count() <= 0),
         ];
     }
     
