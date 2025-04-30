@@ -53,9 +53,8 @@ class ModManagerResource extends Resource
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('eggs.name')
                     ->label('Eggs')
-                    ->state(function ($record) {
-                        return $record->eggs->pluck('name')->implode(', ');
-                    }),
+                    ->badge()
+                    ->color('primary'),
                 Tables\Columns\ToggleColumn::make('enabled')->label('Enabled'),
             ])
             ->filters([
@@ -67,6 +66,20 @@ class ModManagerResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('enable')
+                        ->label('Enable Selected')
+                        ->icon('tabler-toggle-right')
+                        ->color('success')
+                        ->action(function ($records) {
+                            $records->each->update(['enabled' => true]);
+                        }),
+                    Tables\Actions\BulkAction::make('disable')
+                        ->label('Disable Selected')
+                        ->icon('tabler-toggle-left')
+                        ->color('danger')
+                        ->action(function ($records) {
+                            $records->each->update(['enabled' => false]);
+                        }),
                 ]),
             ]);
     }
