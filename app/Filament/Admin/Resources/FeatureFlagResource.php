@@ -33,7 +33,7 @@ class FeatureFlagResource extends Resource
 
     public static function getNavigationBadgeColor(): ?string
     {
-        return 'success';
+        return 'primary';
     }
 
     public static function getModelLabel(): string
