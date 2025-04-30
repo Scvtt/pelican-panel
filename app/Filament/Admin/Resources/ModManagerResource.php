@@ -17,7 +17,14 @@ class ModManagerResource extends Resource
 {
     protected static ?string $model = ModManager::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'tabler-tool';
+    protected static ?string $navigationGroup = 'Server';
+    protected static ?int $navigationSort = 2;
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Mod Managers';
+    }
 
     public static function form(Form $form): Form
     {
