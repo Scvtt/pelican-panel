@@ -2,9 +2,9 @@
 
 namespace App\Filament\Admin\Resources;
 
-use App\Filament\Admin\Resources\ModManagerResource\Pages;
-use App\Filament\Admin\Resources\ModManagerResource\RelationManagers;
-use App\Models\ModManager;
+use App\Filament\Admin\Resources\FeatureFlagResource\Pages;
+use App\Filament\Admin\Resources\FeatureFlagResource\RelationManagers;
+use App\Models\FeatureFlag;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,9 +13,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ModManagerResource extends Resource
+class FeatureFlagResource extends Resource
 {
-    protected static ?string $model = ModManager::class;
+    protected static ?string $model = FeatureFlag::class;
 
     protected static ?string $navigationIcon = 'tabler-tool';
     protected static ?string $navigationGroup = 'Server';
@@ -23,7 +23,7 @@ class ModManagerResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Mod Managers';
+        return 'Feature Flags';
     }
 
     public static function form(Form $form): Form
@@ -94,9 +94,9 @@ class ModManagerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListModManagers::route('/'),
-            'create' => Pages\CreateModManager::route('/create'),
-            'edit' => Pages\EditModManager::route('/{record}/edit'),
+            'index' => Pages\ListFeatureFlags::route('/'),
+            'create' => Pages\CreateFeatureFlag::route('/create'),
+            'edit' => Pages\EditFeatureFlag::route('/{record}/edit'),
         ];
     }
 }

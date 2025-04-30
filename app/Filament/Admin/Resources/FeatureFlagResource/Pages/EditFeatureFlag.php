@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Filament\Admin\Resources\ModManagerResource\Pages;
+namespace App\Filament\Admin\Resources\FeatureFlagResource\Pages;
 
-use App\Filament\Admin\Resources\ModManagerResource;
+use App\Filament\Admin\Resources\FeatureFlagResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditModManager extends EditRecord
+class EditFeatureFlag extends EditRecord
 {
-    protected static string $resource = ModManagerResource::class;
-
+    protected static string $resource = FeatureFlagResource::class;
+    
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
@@ -21,4 +21,4 @@ class EditModManager extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
-}
+} 

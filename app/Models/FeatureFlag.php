@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ModManager extends Model
+class FeatureFlag extends Model
 {
     protected $fillable = [
         'name',
@@ -18,8 +18,8 @@ class ModManager extends Model
     {
         return $this->belongsToMany(
             \App\Models\Egg::class,
-            'egg_mod_manager',
-            'mod_manager_id',
+            'egg_feature_flag',
+            'feature_flag_id',
             'egg_id'
         );
     }

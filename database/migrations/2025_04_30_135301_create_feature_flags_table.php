@@ -11,21 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mod_managers', function (Blueprint $table) {
+        Schema::create('feature_flags', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->boolean('enabled')->default(true);
             $table->timestamps();
         });
 
-        Schema::create('egg_mod_manager', function (Blueprint $table) {
+        Schema::create('egg_feature_flag', function (Blueprint $table) {
             $table->unsignedBigInteger('egg_id');
-            $table->unsignedBigInteger('mod_manager_id');
+            $table->unsignedBigInteger('feature_flag_id');
             
             $table->foreign('egg_id')->references('id')->on('eggs')->onDelete('cascade');
-            $table->foreign('mod_manager_id')->references('id')->on('mod_managers')->onDelete('cascade');
+            $table->foreign('feature_flag_id')->references('id')->on('feature_flags')->onDelete('cascade');
             
-            $table->primary(['egg_id', 'mod_manager_id']);
+            $table->primary(['egg_id', 'feature_flag_id']);
         });
     }
 
@@ -34,7 +34,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('egg_mod_manager');
-        Schema::dropIfExists('mod_managers');
+        Schema::dropIfExists('egg_feature_flag');
+        Schema::dropIfExists('feature_flags');
     }
 };
