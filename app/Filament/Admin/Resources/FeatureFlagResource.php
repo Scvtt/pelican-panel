@@ -25,6 +25,17 @@ class FeatureFlagResource extends Resource
         return 'Feature Flags';
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        $count = static::getModel()::where('enabled', true)->count();
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'success';
+    }
+
     public static function getModelLabel(): string
     {
         return 'Feature Flag';
