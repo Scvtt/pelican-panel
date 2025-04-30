@@ -33,9 +33,11 @@ class ModManagerResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Select::make('egg_id')
-                    ->label('Egg')
-                    ->relationship('egg', 'name')
+                Forms\Components\Select::make('eggs')
+                    ->label('Eggs')
+                    ->multiple()
+                    ->relationship('eggs', 'name')
+                    ->preload()
                     ->searchable()
                     ->required(),
                 Forms\Components\Toggle::make('enabled')
@@ -49,7 +51,10 @@ class ModManagerResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('egg.name')->label('Egg')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('eggs.name')
+                    ->label('Eggs')
+                    ->listWithLineBreaks()
+                    ->bulleted(),
                 Tables\Columns\ToggleColumn::make('enabled')->label('Enabled'),
             ])
             ->filters([

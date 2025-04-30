@@ -8,12 +8,11 @@ class ModManager extends Model
 {
     protected $fillable = [
         'name',
-        'egg_id',
         'enabled'
     ];
 
-    public function egg()
+    public function eggs()
     {
-        return $this->belongsTo(\App\Models\Egg::class);
+        return $this->belongsToMany(\App\Models\Egg::class);
     }
 }

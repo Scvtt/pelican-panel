@@ -14,11 +14,14 @@ return new class extends Migration
         Schema::create('mod_managers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->unsignedBigInteger('egg_id');
             $table->boolean('enabled')->default(true);
             $table->timestamps();
+        });
 
-            $table->foreign('egg_id')->references('id')->on('eggs')->onDelete('cascade');
+        Schema::create('egg_mod_manager', function (Blueprint $table) {
+            $table->foreignId('egg_id')->constrained()->onDelete('cascade');
+            $table->foreignId('mod_manager_id')->constrained()->onDelete('cascade');
+            $table->primary(['egg_id', 'mod_manager_id']);
         });
     }
 
@@ -27,6 +30,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('egg_mod_manager');
         Schema::dropIfExists('mod_managers');
     }
 };

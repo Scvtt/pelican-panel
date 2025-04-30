@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateModManager extends CreateRecord
 {
     protected static string $resource = ModManagerResource::class;
+    
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
