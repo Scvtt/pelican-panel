@@ -98,7 +98,6 @@ class FeatureFlagResource extends Resource
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
                     ->label('New Feature Flag')
-                    ->icon('tabler-plus'),
             ]);
     }
 
