@@ -53,9 +53,9 @@ class ModManagerResource extends Resource
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('eggs.name')
                     ->label('Eggs')
-                    ->listWithLineBreaks()
-                    ->bulleted()
-                    ->formatStateUsing(fn ($state, $record) => $record->eggs->pluck('name')->toArray()),
+                    ->state(function ($record) {
+                        return $record->eggs->pluck('name')->implode(', ');
+                    }),
                 Tables\Columns\ToggleColumn::make('enabled')->label('Enabled'),
             ])
             ->filters([
