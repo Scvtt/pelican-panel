@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 class ReforgerModService
 {
     protected string $apiUrl;
+    protected array $cachedModsData = [];
     
     public function __construct()
     {
@@ -25,89 +26,56 @@ class ReforgerModService
      */
     public function getMods(?string $sort = 'popular', ?array $tags = null, int $page = 1): array
     {
-        // Cache key based on parameters
-        $cacheKey = "reforger_mods_{$sort}_" . ($tags ? implode('_', $tags) : 'all') . "_{$page}";
+        // Cache the entire workshop data for 5 minutes
+        $workshopData = $this->getWorkshopData();
+        $mods = $workshopData['data'] ?? [];
         
-        // Clear cache during development for testing
-        if (app()->environment('local')) {
-            Cache::forget($cacheKey);
+        // Filter by tags if provided
+        if (!empty($tags)) {
+            $mods = array_filter($mods, function($mod) use ($tags) {
+                $modTags = $mod['tags'] ?? [];
+                foreach ($tags as $tag) {
+                    if (in_array($tag, $modTags)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            // Re-index array after filtering
+            $mods = array_values($mods);
         }
         
-        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($sort, $tags, $page) {
-            try {
-                // Use the correct /workshop endpoint that returns the full mod list
-                $apiUrl = $this->apiUrl . '/workshop';
-                \Log::debug("Fetching mods from: {$apiUrl}");
-                
-                $response = Http::get($apiUrl);
-                
-                \Log::debug("API Response status: " . $response->status());
-                
-                if ($response->successful()) {
-                    $responseData = $response->json();
-                    $mods = $responseData['data'] ?? [];
-                    \Log::debug("Got " . count($mods) . " mods from API");
-                    
-                    // Filter by tags if provided
-                    if (!empty($tags)) {
-                        $mods = array_filter($mods, function($mod) use ($tags) {
-                            $modTags = $mod['tags'] ?? [];
-                            foreach ($tags as $tag) {
-                                if (in_array($tag, $modTags)) {
-                                    return true;
-                                }
-                            }
-                            return false;
-                        });
-                    }
-                    
-                    // Sort the mods
-                    if ($sort === 'popular') {
-                        usort($mods, function($a, $b) {
-                            return ($b['subscriberCount'] ?? 0) <=> ($a['subscriberCount'] ?? 0);
-                        });
-                    } elseif ($sort === 'rating') {
-                        usort($mods, function($a, $b) {
-                            return ($b['averageRating'] ?? 0) <=> ($a['averageRating'] ?? 0);
-                        });
-                    } elseif ($sort === 'newest') {
-                        usort($mods, function($a, $b) {
-                            return strtotime($b['createdAt'] ?? 0) <=> strtotime($a['createdAt'] ?? 0);
-                        });
-                    } elseif ($sort === 'updated') {
-                        usort($mods, function($a, $b) {
-                            return strtotime($b['updatedAt'] ?? 0) <=> strtotime($a['updatedAt'] ?? 0);
-                        });
-                    }
-                    
-                    // Handle pagination
-                    $pageSize = 20; // You can adjust this or make it configurable
-                    $offset = ($page - 1) * $pageSize;
-                    $paginatedMods = array_slice($mods, $offset, $pageSize);
-                    
-                    return [
-                        'data' => $paginatedMods,
-                        'total' => count($mods),
-                        'page' => $page,
-                        'pageSize' => $pageSize,
-                        'totalPages' => ceil(count($mods) / $pageSize)
-                    ];
-                } else {
-                    \Log::error("API Error: " . $response->body());
-                }
-            } catch (\Exception $e) {
-                \Log::error("Error fetching mods: " . $e->getMessage());
-            }
-            
-            // Return empty array structure instead of null when no data is available
-            return [
-                'data' => [],
-                'total' => 0,
-                'page' => $page,
-                'pageSize' => 20,
-                'totalPages' => 0
-            ];
-        });
+        // Sort the mods
+        if ($sort === 'popular') {
+            usort($mods, function($a, $b) {
+                return ($b['subscriberCount'] ?? 0) <=> ($a['subscriberCount'] ?? 0);
+            });
+        } elseif ($sort === 'rating') {
+            usort($mods, function($a, $b) {
+                return ($b['averageRating'] ?? 0) <=> ($a['averageRating'] ?? 0);
+            });
+        } elseif ($sort === 'newest') {
+            usort($mods, function($a, $b) {
+                return strtotime($b['createdAt'] ?? 0) <=> strtotime($a['createdAt'] ?? 0);
+            });
+        } elseif ($sort === 'updated') {
+            usort($mods, function($a, $b) {
+                return strtotime($b['updatedAt'] ?? 0) <=> strtotime($a['updatedAt'] ?? 0);
+            });
+        }
+        
+        // Handle pagination
+        $pageSize = 16; // 4x4 grid layout
+        $offset = ($page - 1) * $pageSize;
+        $paginatedMods = array_slice($mods, $offset, $pageSize);
+        
+        return [
+            'data' => $paginatedMods,
+            'total' => count($mods),
+            'page' => $page,
+            'pageSize' => $pageSize,
+            'totalPages' => ceil(count($mods) / $pageSize)
+        ];
     }
     
     /**
@@ -118,19 +86,30 @@ class ReforgerModService
      */
     public function getModDetails(string $modId): array
     {
-        $cacheKey = "reforger_mod_{$modId}";
+        // Get from cached workshop data if available
+        $workshopData = $this->getWorkshopData();
+        $mods = $workshopData['data'] ?? [];
         
-        // For development, clear cache
-        if (app()->environment('local')) {
-            Cache::forget($cacheKey);
+        foreach ($mods as $mod) {
+            if (($mod['id'] ?? '') === $modId) {
+                return $mod;
+            }
         }
         
-        return Cache::remember($cacheKey, now()->addHours(1), function () use ($modId) {           
+        // If not found in cached data, make a specific request
+        return Cache::remember("reforger_mod_{$modId}", now()->addHours(1), function () use ($modId) {           
             try {
-                $response = Http::get($this->apiUrl . '/mods/' . $modId);
+                $response = Http::get($this->apiUrl . '/workshop');
                 
                 if ($response->successful()) {
-                    return $response->json();
+                    $data = $response->json();
+                    $mods = $data['data'] ?? [];
+                    
+                    foreach ($mods as $mod) {
+                        if (($mod['id'] ?? '') === $modId) {
+                            return $mod;
+                        }
+                    }
                 }
             } catch (\Exception $e) {
                 \Log::error("Error fetching mod details: " . $e->getMessage());
@@ -147,23 +126,27 @@ class ReforgerModService
      */
     public function getTags(): array
     {
-        $cacheKey = "reforger_mod_tags";
-        
-        // For development, clear cache
-        if (app()->environment('local')) {
-            Cache::forget($cacheKey);
-            return ['WEAPONS', 'VEHICLES', 'MISC', 'CHARACTERS', 'EFFECTS'];
-        }
-        
-        return Cache::remember($cacheKey, now()->addDay(), function () {
+        return Cache::remember("reforger_mod_tags", now()->addDay(), function () {
             try {
-                $response = Http::get($this->apiUrl . '/tags');
+                // Extract unique tags from all mods
+                $workshopData = $this->getWorkshopData();
+                $mods = $workshopData['data'] ?? [];
                 
-                if ($response->successful()) {
-                    return $response->json();
+                $allTags = [];
+                foreach ($mods as $mod) {
+                    if (isset($mod['tags']) && is_array($mod['tags'])) {
+                        foreach ($mod['tags'] as $tag) {
+                            $allTags[$tag] = true;
+                        }
+                    }
                 }
+                
+                $uniqueTags = array_keys($allTags);
+                sort($uniqueTags);
+                
+                return $uniqueTags;
             } catch (\Exception $e) {
-                \Log::error("Error fetching tags: " . $e->getMessage());
+                \Log::error("Error extracting tags: " . $e->getMessage());
             }
             
             return ['WEAPONS', 'VEHICLES', 'MISC', 'CHARACTERS', 'EFFECTS'];
@@ -255,5 +238,35 @@ class ReforgerModService
         }
         
         return implode(';', $addons);
+    }
+    
+    /**
+     * Get the complete workshop data
+     * 
+     * @return array
+     */
+    protected function getWorkshopData(): array
+    {
+        return Cache::remember("reforger_workshop_data", now()->addMinutes(5), function () {
+            try {
+                \Log::debug("Fetching workshop data from: {$this->apiUrl}/workshop");
+                $response = Http::get($this->apiUrl . '/workshop');
+                
+                if ($response->successful()) {
+                    $data = $response->json();
+                    \Log::debug("Got " . count($data['data'] ?? []) . " mods from workshop API");
+                    return $data;
+                } else {
+                    \Log::error("Workshop API Error: " . $response->body());
+                }
+            } catch (\Exception $e) {
+                \Log::error("Error fetching workshop data: " . $e->getMessage());
+            }
+            
+            return [
+                'exported' => now()->format('Y-m-d H:i:s'),
+                'data' => []
+            ];
+        });
     }
 } 

@@ -30,6 +30,7 @@ class Workshop extends Page implements HasForms
     public string $currentSort = 'popular';
     public array $selectedTags = [];
     public int $currentPage = 1;
+    public int $totalPages = 1;
     
     public function mount(): void
     {
@@ -91,12 +92,14 @@ class Workshop extends Page implements HasForms
             
             $this->availableMods = $result['data'] ?? [];
             $this->exportedTime = $result['exported'] ?? now()->format('Y-m-d H:i:s');
+            $this->totalPages = $result['totalPages'] ?? 1;
             
             \Log::debug("Loaded " . count($this->availableMods) . " mods");
         } catch (\Exception $e) {
             \Log::error("Error loading mods: " . $e->getMessage());
             $this->availableMods = [];
             $this->exportedTime = now()->format('Y-m-d H:i:s');
+            $this->totalPages = 1;
         }
     }
     

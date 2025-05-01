@@ -94,13 +94,13 @@
                     </div>
                 @endif
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
                     @foreach ($availableMods as $mod)
                         <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800">
                             @if (!empty($mod['preview_url']))
-                                <img src="{{ $mod['preview_url'] }}" alt="{{ $mod['name'] }}" class="w-full h-40 object-cover" />
+                                <img src="{{ $mod['preview_url'] }}" alt="{{ $mod['name'] }}" class="w-full h-40 object-cover max-h-[160px]" />
                             @else
-                                <div class="w-full h-40 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <div class="w-full h-40 max-h-[160px] bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                                     <x-tabler-cube class="w-12 h-12 text-gray-400" />
                                 </div>
                             @endif
@@ -153,7 +153,11 @@
                         Data exported: {{ $exportedTime }}
                     </div>
                     
-                    <div class="flex space-x-2">
+                    <div class="flex space-x-2 items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400 mr-2">
+                            Page {{ $currentPage }} of {{ $totalPages }}
+                        </span>
+                        
                         @if ($currentPage > 1)
                             <button 
                                 type="button"
@@ -164,13 +168,15 @@
                             </button>
                         @endif
                         
-                        <button 
-                            type="button"
-                            wire:click="changePage({{ $currentPage + 1 }})"
-                            class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
-                        >
-                            Next
-                        </button>
+                        @if ($currentPage < $totalPages)
+                            <button 
+                                type="button"
+                                wire:click="changePage({{ $currentPage + 1 }})"
+                                class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
+                            >
+                                Next
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
