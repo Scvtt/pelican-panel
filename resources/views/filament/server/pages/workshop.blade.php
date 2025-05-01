@@ -94,9 +94,9 @@
                     </div>
                 @endif
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                     @foreach ($availableMods as $mod)
-                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800">
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800 flex flex-col">
                             @if (!empty($mod['preview_url']))
                                 <img src="{{ $mod['preview_url'] }}" alt="{{ $mod['name'] }}" class="w-full object-cover" style="height: 160px;" />
                             @else
@@ -105,7 +105,7 @@
                                 </div>
                             @endif
                             
-                            <div class="p-4">
+                            <div class="p-4 flex-grow">
                                 <h4 class="font-medium text-gray-900 dark:text-white mb-1">{{ $mod['name'] }}</h4>
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">By {{ $mod['author'] }}</p>
                                 
