@@ -237,6 +237,11 @@ class ReforgerModService
             }
         }
         
+        // If no addons are left, return an empty string
+        if (empty($addons)) {
+            return '';
+        }
+        
         return implode(';', $addons) . ';';
     }
     
