@@ -53,6 +53,11 @@ class FeatureFlagResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('flag')
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255)
+                    ->helperText('A unique identifier for this flag (e.g., AR_WORKSHOP)'),
                 Forms\Components\Select::make('eggs')
                     ->label('Eggs')
                     ->multiple()
@@ -71,6 +76,8 @@ class FeatureFlagResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('flag')->sortable()->searchable()
+                    ->copyable(),
                 Tables\Columns\TextColumn::make('eggs.name')
                     ->label('Eggs')
                     ->badge()

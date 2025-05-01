@@ -8,6 +8,7 @@ class FeatureFlag extends Model
 {
     protected $fillable = [
         'name',
+        'flag',
         'enabled'
     ];
 
