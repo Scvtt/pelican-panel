@@ -83,51 +83,21 @@ class Workshop extends Page implements HasForms
             ->exists();
     }
     
-    /**
-     * Get the WORKSHOP_ADDONS egg variable
-     */
-    protected function getWorkshopAddonsVariable(): ?ServerVariable
-    {
-        /** @var Server $server */
-        $server = Filament::getTenant();
-        
-        $variable = EggVariable::where('egg_id', $server->egg_id)
-            ->where('env_variable', 'WORKSHOP_ADDONS')
-            ->first();
-            
-        if (!$variable) {
-            return null;
-        }
-        
-        return ServerVariable::where('server_id', $server->id)
-            ->where('variable_id', $variable->id)
-            ->first();
-    }
-    
-    /**
-     * Save changes to the WORKSHOP_ADDONS egg variable
-     */
-    protected function saveWorkshopAddons(array $modData): void
-    {
-        $modService = app(ReforgerModService::class);
-        $workshopVariable = $this->getWorkshopAddonsVariable();
-        
-        if (!$workshopVariable) {
-            return;
-        }
-        
-        $workshopVariable->update([
-            'variable_value' => $modService->generateWorkshopAddons($modData)
-        ]);
-    }
-    
     public function loadMods(): void
     {
-        $modService = app(ReforgerModService::class);
-        $result = $modService->getMods($this->currentSort, $this->selectedTags, $this->currentPage);
-        
-        $this->availableMods = $result['data'] ?? [];
-        $this->exportedTime = $result['exported'] ?? now()->format('Y-m-d H:i:s');
+        try {
+            $modService = app(ReforgerModService::class);
+            $result = $modService->getMods($this->currentSort, $this->selectedTags, $this->currentPage);
+            
+            $this->availableMods = $result['data'] ?? [];
+            $this->exportedTime = $result['exported'] ?? now()->format('Y-m-d H:i:s');
+            
+            \Log::debug("Loaded " . count($this->availableMods) . " mods");
+        } catch (\Exception $e) {
+            \Log::error("Error loading mods: " . $e->getMessage());
+            $this->availableMods = [];
+            $this->exportedTime = now()->format('Y-m-d H:i:s');
+        }
     }
     
     public function loadInstalledMods(): void
@@ -271,5 +241,62 @@ class Workshop extends Page implements HasForms
         $modIds = array_column($parsedMods, 'id');
         
         return $modService->generateModList($modIds);
+    }
+    
+    /**
+     * Get the WORKSHOP_ADDONS egg variable
+     */
+    protected function getWorkshopAddonsVariable(): ?ServerVariable
+    {
+        try {
+            /** @var Server $server */
+            $server = Filament::getTenant();
+            
+            $variable = EggVariable::where('egg_id', $server->egg_id)
+                ->where('env_variable', 'WORKSHOP_ADDONS')
+                ->first();
+                
+            if (!$variable) {
+                \Log::warning("WORKSHOP_ADDONS egg variable not found for egg_id: " . $server->egg_id);
+                return null;
+            }
+            
+            $serverVar = ServerVariable::where('server_id', $server->id)
+                ->where('variable_id', $variable->id)
+                ->first();
+                
+            if (!$serverVar) {
+                \Log::info("Creating WORKSHOP_ADDONS server variable for server: " . $server->id);
+                
+                // Create the server variable if it doesn't exist
+                $serverVar = ServerVariable::create([
+                    'server_id' => $server->id,
+                    'variable_id' => $variable->id,
+                    'variable_value' => '',
+                ]);
+            }
+            
+            return $serverVar;
+        } catch (\Exception $e) {
+            \Log::error("Error getting WORKSHOP_ADDONS variable: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Save changes to the WORKSHOP_ADDONS egg variable
+     */
+    protected function saveWorkshopAddons(array $modData): void
+    {
+        $modService = app(ReforgerModService::class);
+        $workshopVariable = $this->getWorkshopAddonsVariable();
+        
+        if (!$workshopVariable) {
+            return;
+        }
+        
+        $workshopVariable->update([
+            'variable_value' => $modService->generateWorkshopAddons($modData)
+        ]);
     }
 } 
