@@ -2,18 +2,34 @@
 
 namespace App\Filament\Server\Pages;
 
+use App\Models\EggVariable;
 use App\Models\FeatureFlag;
 use App\Models\Server;
+use App\Models\ServerVariable;
+use App\Services\Mods\ReforgerModService;
 use Filament\Facades\Filament;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
+use Illuminate\Support\Collection;
 
-class Workshop extends Page
+class Workshop extends Page implements HasForms
 {
+    use InteractsWithForms;
+
     protected static ?string $navigationIcon = 'tabler-cube';
     
     protected static ?int $navigationSort = 8; // Place between Startup (9) and lower items
     
     protected static string $view = 'filament.server.pages.workshop';
+    
+    public array $availableMods = [];
+    public array $installedMods = [];
+    public array $availableTags = [];
+    public string $exportedTime = '';
+    public string $currentSort = 'popular';
+    public array $selectedTags = [];
+    public int $currentPage = 1;
     
     public function mount(): void
     {
@@ -21,6 +37,10 @@ class Workshop extends Page
         if (!$this->canAccessWorkshop()) {
             redirect()->to(Filament::getUrl());
         }
+        
+        $this->loadMods();
+        $this->loadInstalledMods();
+        $this->loadTags();
     }
     
     // This ensures the page appears in navigation only when the feature flag is enabled
@@ -61,5 +81,195 @@ class Workshop extends Page
                 $query->where('eggs.id', $eggId);
             })
             ->exists();
+    }
+    
+    /**
+     * Get the WORKSHOP_ADDONS egg variable
+     */
+    protected function getWorkshopAddonsVariable(): ?ServerVariable
+    {
+        /** @var Server $server */
+        $server = Filament::getTenant();
+        
+        $variable = EggVariable::where('egg_id', $server->egg_id)
+            ->where('env_variable', 'WORKSHOP_ADDONS')
+            ->first();
+            
+        if (!$variable) {
+            return null;
+        }
+        
+        return ServerVariable::where('server_id', $server->id)
+            ->where('variable_id', $variable->id)
+            ->first();
+    }
+    
+    /**
+     * Save changes to the WORKSHOP_ADDONS egg variable
+     */
+    protected function saveWorkshopAddons(array $modData): void
+    {
+        $modService = app(ReforgerModService::class);
+        $workshopVariable = $this->getWorkshopAddonsVariable();
+        
+        if (!$workshopVariable) {
+            return;
+        }
+        
+        $workshopVariable->update([
+            'variable_value' => $modService->generateWorkshopAddons($modData)
+        ]);
+    }
+    
+    public function loadMods(): void
+    {
+        $modService = app(ReforgerModService::class);
+        $result = $modService->getMods($this->currentSort, $this->selectedTags, $this->currentPage);
+        
+        $this->availableMods = $result['data'] ?? [];
+        $this->exportedTime = $result['exported'] ?? now()->format('Y-m-d H:i:s');
+    }
+    
+    public function loadInstalledMods(): void
+    {
+        $workshopVariable = $this->getWorkshopAddonsVariable();
+        $modService = app(ReforgerModService::class);
+        
+        if (!$workshopVariable) {
+            $this->installedMods = [];
+            return;
+        }
+        
+        $parsedMods = $modService->parseWorkshopAddons($workshopVariable->variable_value);
+        $modDetails = [];
+        
+        foreach ($parsedMods as $mod) {
+            $details = $modService->getModDetails($mod['id']);
+            if (!empty($details)) {
+                $details['version'] = $mod['version'] ?? $details['currentVersionNumber'] ?? null;
+                $modDetails[] = $details;
+            }
+        }
+        
+        $this->installedMods = $modDetails;
+    }
+    
+    public function loadTags(): void
+    {
+        $modService = app(ReforgerModService::class);
+        $this->availableTags = $modService->getTags();
+    }
+    
+    public function changePage(int $page): void
+    {
+        $this->currentPage = $page;
+        $this->loadMods();
+    }
+    
+    public function changeSort(string $sort): void
+    {
+        $this->currentSort = $sort;
+        $this->loadMods();
+    }
+    
+    public function toggleTag(string $tag): void
+    {
+        if (in_array($tag, $this->selectedTags)) {
+            $this->selectedTags = array_filter($this->selectedTags, fn($t) => $t !== $tag);
+        } else {
+            $this->selectedTags[] = $tag;
+        }
+        
+        $this->loadMods();
+    }
+    
+    public function installMod(string $modId): void
+    {
+        // Find mod in available mods
+        $mod = collect($this->availableMods)->firstWhere('id', $modId);
+        
+        if (!$mod) {
+            return;
+        }
+        
+        $workshopVariable = $this->getWorkshopAddonsVariable();
+        if (!$workshopVariable) {
+            return;
+        }
+        
+        $modService = app(ReforgerModService::class);
+        $existingMods = $modService->parseWorkshopAddons($workshopVariable->variable_value);
+        
+        // Check if mod is already installed
+        if (collect($existingMods)->contains('id', $modId)) {
+            return;
+        }
+        
+        // Add new mod
+        $existingMods[] = [
+            'id' => $modId,
+            'version' => $mod['currentVersionNumber'] ?? null
+        ];
+        
+        $this->saveWorkshopAddons($existingMods);
+        $this->loadInstalledMods();
+    }
+    
+    public function uninstallMod(string $modId): void
+    {
+        $workshopVariable = $this->getWorkshopAddonsVariable();
+        if (!$workshopVariable) {
+            return;
+        }
+        
+        $modService = app(ReforgerModService::class);
+        $existingMods = $modService->parseWorkshopAddons($workshopVariable->variable_value);
+        
+        // Filter out the mod to uninstall
+        $filteredMods = array_filter($existingMods, function ($mod) use ($modId) {
+            return $mod['id'] !== $modId;
+        });
+        
+        $this->saveWorkshopAddons($filteredMods);
+        $this->loadInstalledMods();
+    }
+    
+    public function updateModVersion(string $modId, string $version): void
+    {
+        $workshopVariable = $this->getWorkshopAddonsVariable();
+        if (!$workshopVariable) {
+            return;
+        }
+        
+        $modService = app(ReforgerModService::class);
+        $existingMods = $modService->parseWorkshopAddons($workshopVariable->variable_value);
+        
+        // Update version for the specified mod
+        foreach ($existingMods as &$mod) {
+            if ($mod['id'] === $modId) {
+                $mod['version'] = $version;
+                break;
+            }
+        }
+        
+        $this->saveWorkshopAddons($existingMods);
+        $this->loadInstalledMods();
+    }
+    
+    public function generateModList(): array
+    {
+        $workshopVariable = $this->getWorkshopAddonsVariable();
+        if (!$workshopVariable) {
+            return [
+                'exported' => now()->format('Y-m-d H:i:s'),
+                'data' => [],
+            ];
+        }
+        
+        $modService = app(ReforgerModService::class);
+        $parsedMods = $modService->parseWorkshopAddons($workshopVariable->variable_value);
+        $modIds = array_column($parsedMods, 'id');
+        
+        return $modService->generateModList($modIds);
     }
 } 
