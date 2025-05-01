@@ -237,7 +237,7 @@ class ReforgerModService
             }
         }
         
-        return implode(';', $addons);
+        return implode(';', $addons) . ';';
     }
     
     /**
