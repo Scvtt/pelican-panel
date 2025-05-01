@@ -13,13 +13,6 @@ class ReforgerModService
     {
         // If the URL is configured in .env, use that, otherwise use the default
         $this->apiUrl = env('REFORGER_MOD_API_URL', 'https://mod.reforger.link/api');
-        
-        // Force fallback data in development environment
-        if (app()->environment('local')) {
-            $this->useMockData = true;
-        } else {
-            $this->useMockData = false;
-        }
     }
     
     /**
@@ -42,33 +35,78 @@ class ReforgerModService
         
         return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($sort, $tags, $page) {
             try {
-                $apiUrl = $this->apiUrl . '/mods';
+                // Use the correct /workshop endpoint that returns the full mod list
+                $apiUrl = $this->apiUrl . '/workshop';
                 \Log::debug("Fetching mods from: {$apiUrl}");
                 
-                $params = [
-                    'sort' => $sort,
-                    'page' => $page,
-                ];
-                
-                if (!empty($tags)) {
-                    $params['tags'] = $tags;
-                }
-                
-                \Log::debug("Request params: " . json_encode($params));
-                $response = Http::get($apiUrl, $params);
+                $response = Http::get($apiUrl);
                 
                 \Log::debug("API Response status: " . $response->status());
                 
                 if ($response->successful()) {
-                    $data = $response->json();
-                    \Log::debug("Got " . count($data['data'] ?? []) . " mods from API");
-                    return $data;
+                    $responseData = $response->json();
+                    $mods = $responseData['data'] ?? [];
+                    \Log::debug("Got " . count($mods) . " mods from API");
+                    
+                    // Filter by tags if provided
+                    if (!empty($tags)) {
+                        $mods = array_filter($mods, function($mod) use ($tags) {
+                            $modTags = $mod['tags'] ?? [];
+                            foreach ($tags as $tag) {
+                                if (in_array($tag, $modTags)) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        });
+                    }
+                    
+                    // Sort the mods
+                    if ($sort === 'popular') {
+                        usort($mods, function($a, $b) {
+                            return ($b['subscriberCount'] ?? 0) <=> ($a['subscriberCount'] ?? 0);
+                        });
+                    } elseif ($sort === 'rating') {
+                        usort($mods, function($a, $b) {
+                            return ($b['averageRating'] ?? 0) <=> ($a['averageRating'] ?? 0);
+                        });
+                    } elseif ($sort === 'newest') {
+                        usort($mods, function($a, $b) {
+                            return strtotime($b['createdAt'] ?? 0) <=> strtotime($a['createdAt'] ?? 0);
+                        });
+                    } elseif ($sort === 'updated') {
+                        usort($mods, function($a, $b) {
+                            return strtotime($b['updatedAt'] ?? 0) <=> strtotime($a['updatedAt'] ?? 0);
+                        });
+                    }
+                    
+                    // Handle pagination
+                    $pageSize = 20; // You can adjust this or make it configurable
+                    $offset = ($page - 1) * $pageSize;
+                    $paginatedMods = array_slice($mods, $offset, $pageSize);
+                    
+                    return [
+                        'data' => $paginatedMods,
+                        'total' => count($mods),
+                        'page' => $page,
+                        'pageSize' => $pageSize,
+                        'totalPages' => ceil(count($mods) / $pageSize)
+                    ];
                 } else {
                     \Log::error("API Error: " . $response->body());
                 }
             } catch (\Exception $e) {
                 \Log::error("Error fetching mods: " . $e->getMessage());
             }
+            
+            // Return empty array structure instead of null when no data is available
+            return [
+                'data' => [],
+                'total' => 0,
+                'page' => $page,
+                'pageSize' => 20,
+                'totalPages' => 0
+            ];
         });
     }
     
