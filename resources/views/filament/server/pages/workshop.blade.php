@@ -98,9 +98,9 @@
                     @foreach ($availableMods as $mod)
                         <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800">
                             @if (!empty($mod['preview_url']))
-                                <img src="{{ $mod['preview_url'] }}" alt="{{ $mod['name'] }}" class="w-full h-40 object-cover max-h-[160px]" />
+                                <img src="{{ $mod['preview_url'] }}" alt="{{ $mod['name'] }}" class="w-full h-[160px] object-cover" />
                             @else
-                                <div class="w-full h-40 max-h-[160px] bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <div class="w-full h-[160px] bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                                     <x-tabler-cube class="w-12 h-12 text-gray-400" />
                                 </div>
                             @endif
