@@ -65,7 +65,7 @@ class ReforgerModService
         }
         
         // Handle pagination
-        $pageSize = 16; // 4x4 grid layout
+        $pageSize = 12; // 3x4 grid layout
         $offset = ($page - 1) * $pageSize;
         $paginatedMods = array_slice($mods, $offset, $pageSize);
         
