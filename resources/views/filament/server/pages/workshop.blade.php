@@ -52,13 +52,14 @@
                                                 {{ $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest' }}
                                             </td>
                                             <td class="py-2 px-4">
-                                                <button 
+                                                <x-filament::button
                                                     type="button" 
                                                     wire:click="uninstallMod('{{ $mod['id'] }}')"
-                                                    class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+                                                    color="danger"
+                                                    size="sm"
                                                 >
                                                     Remove
-                                                </button>
+                                                </x-filament::button>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -92,13 +93,15 @@
                     @if (!empty($availableTags))
                         <div class="flex flex-wrap gap-2 mb-4">
                             @foreach ($availableTags as $tag)
-                                <button 
+                                <x-filament::button 
                                     type="button"
                                     wire:click="toggleTag('{{ $tag }}')"
-                                    class="px-2 py-1 text-xs rounded-full {{ in_array($tag, $selectedTags) ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}"
+                                    :color="in_array($tag, $selectedTags) ? 'primary' : 'gray'"
+                                    size="xs"
+                                    class="rounded-full"
                                 >
                                     {{ $tag }}
-                                </button>
+                                </x-filament::button>
                             @endforeach
                         </div>
                     @endif
@@ -142,21 +145,23 @@
                                             $isInstalled = collect($installedMods)->contains('id', $mod['id']);
                                         @endphp
                                         @if ($isInstalled)
-                                            <button 
+                                            <x-filament::button
                                                 type="button"
                                                 wire:click="uninstallMod('{{ $mod['id'] }}')"
-                                                class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+                                                color="danger"
+                                                size="sm"
                                             >
                                                 Uninstall
-                                            </button>
+                                            </x-filament::button>
                                         @else
-                                            <button 
+                                            <x-filament::button
                                                 type="button"
                                                 wire:click="installMod('{{ $mod['id'] }}')"
-                                                class="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                                                color="primary"
+                                                size="sm"
                                             >
                                                 Install
-                                            </button>
+                                            </x-filament::button>
                                         @endif
                                     </div>
                                 </div>
@@ -181,23 +186,25 @@
                             </span>
                             
                             @if ($currentPage > 1)
-                                <button 
+                                <x-filament::button
                                     type="button"
                                     wire:click="changePage({{ $currentPage - 1 }})"
-                                    class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
+                                    color="gray"
+                                    size="sm"
                                 >
                                     Previous
-                                </button>
+                                </x-filament::button>
                             @endif
                             
                             @if ($currentPage < $totalPages)
-                                <button 
+                                <x-filament::button
                                     type="button"
                                     wire:click="changePage({{ $currentPage + 1 }})"
-                                    class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
+                                    color="gray"
+                                    size="sm"
                                 >
                                     Next
-                                </button>
+                                </x-filament::button>
                             @endif
                         </div>
                     </div>
