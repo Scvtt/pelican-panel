@@ -92,17 +92,17 @@
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white">Available Mods</h3>
                         <div class="flex space-x-2 items-center">
                             <div class="w-60">
-                                <x-filament::input.affixes
-                                    :prefix-icon="fn () => 'tabler-search'"
-                                    prefix-icon-color="gray"
-                                    wire:target="searchTerm"
-                                >
-                                    <x-filament::input
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <x-tabler-search class="w-4 h-4 text-gray-500" />
+                                    </div>
+                                    <input
                                         type="search"
                                         wire:model.live.debounce.300ms="searchTerm"
                                         placeholder="Search mods..."
+                                        class="w-full h-10 py-2 pl-10 pr-3 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50"
                                     />
-                                </x-filament::input.affixes>
+                                </div>
                             </div>
                             
                             <select 
