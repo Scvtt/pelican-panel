@@ -17,7 +17,7 @@
             </x-filament::tabs>
         </div>
 
-        <div class="grid grid-cols-1 gap-6">
+        <div class="grid grid-cols-1 gap-6 mt-6">
             @if ($activeTab === 'installed')
                 <!-- Installed Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
@@ -55,7 +55,7 @@
                                                 <button 
                                                     type="button" 
                                                     wire:click="uninstallMod('{{ $mod['id'] }}')"
-                                                    class="text-red-500 hover:text-red-700"
+                                                    class="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600"
                                                 >
                                                     Remove
                                                 </button>
@@ -145,7 +145,7 @@
                                             <button 
                                                 type="button"
                                                 wire:click="uninstallMod('{{ $mod['id'] }}')"
-                                                class="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                                                class="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600"
                                             >
                                                 Uninstall
                                             </button>
