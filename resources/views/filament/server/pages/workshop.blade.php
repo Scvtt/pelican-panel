@@ -100,24 +100,50 @@
                                 <option value="updated">Recently Updated</option>
                                 <option value="alphabetical">Alphabetical</option>
                             </select>
+                            
+                            @if (!empty($availableTags))
+                                <div class="relative" x-data="{ open: false }">
+                                    <x-filament::button
+                                        type="button"
+                                        color="gray"
+                                        @click="open = !open"
+                                        class="flex items-center"
+                                    >
+                                        Tags ({{ count($selectedTags) }})
+                                        <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </x-filament::button>
+                                    
+                                    <div 
+                                        x-show="open" 
+                                        @click.away="open = false"
+                                        x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 scale-95"
+                                        x-transition:enter-end="opacity-100 scale-100"
+                                        x-transition:leave="transition ease-in duration-75"
+                                        x-transition:leave-start="opacity-100 scale-100"
+                                        x-transition:leave-end="opacity-0 scale-95"
+                                        class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-50 overflow-auto max-h-60"
+                                    >
+                                        <div class="p-2">
+                                            @foreach ($availableTags as $tag)
+                                                <label class="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        wire:model.live="selectedTags" 
+                                                        value="{{ $tag }}"
+                                                        class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:focus:border-primary-600 dark:focus:ring-primary-600"
+                                                    >
+                                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ $tag }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
-                    
-                    @if (!empty($availableTags))
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            @foreach ($availableTags as $tag)
-                                <x-filament::button 
-                                    type="button"
-                                    wire:click="toggleTag('{{ $tag }}')"
-                                    :color="in_array($tag, $selectedTags) ? 'primary' : 'gray'"
-                                    size="xs"
-                                    class="rounded-full"
-                                >
-                                    {{ $tag }}
-                                </x-filament::button>
-                            @endforeach
-                        </div>
-                    @endif
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 mb-4">
                         @foreach ($availableMods as $mod)

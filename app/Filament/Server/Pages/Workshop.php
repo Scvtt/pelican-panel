@@ -215,6 +215,12 @@ class Workshop extends Page implements HasForms
         $this->loadMods();
     }
     
+    public function updatedSelectedTags(): void
+    {
+        $this->currentPage = 1; // Reset to first page when filters change
+        $this->loadMods();
+    }
+    
     public function toggleTag(string $tag): void
     {
         if (in_array($tag, $this->selectedTags)) {
