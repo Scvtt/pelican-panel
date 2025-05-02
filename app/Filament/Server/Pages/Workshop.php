@@ -24,15 +24,57 @@ class Workshop extends Page implements HasForms
     
     protected static string $view = 'filament.server.pages.workshop';
     
+    public ?string $activeTab = 'installed';
+    
+    /**
+     * Available mods from the Reforger Workshop
+     */
     public array $availableMods = [];
+    
+    /**
+     * Installed mods on the server
+     */
     public array $installedMods = [];
+    
+    /**
+     * Available tags for filtering
+     */
     public array $availableTags = [];
-    public string $exportedTime = '';
-    public string $currentSort = 'popular';
+    
+    /**
+     * Selected tags for filtering
+     */
     public array $selectedTags = [];
+    
+    /**
+     * Current page for pagination
+     */
     public int $currentPage = 1;
+    
+    /**
+     * Current sort method
+     */
+    public string $currentSort = 'popular';
+    
+    /**
+     * Total pages for pagination
+     */
     public int $totalPages = 1;
-    public string $activeTab = 'available';
+    
+    /**
+     * Last data export time
+     */
+    public string $exportedTime = '';
+    
+    /**
+     * Current mod ID selected for version updates
+     */
+    public ?string $selectedModId = null;
+    
+    /**
+     * The user input version
+     */
+    public ?string $selectedVersion = null;
     
     public function mount(): void
     {
@@ -236,32 +278,24 @@ class Workshop extends Page implements HasForms
     
     public function showVersionSelect(string $modId): void
     {
-        $mod = collect($this->availableMods)->firstWhere('id', $modId);
-
-        if (!$mod) {
-            // Try to find in installed mods
-            $mod = collect($this->installedMods)->firstWhere('id', $modId);
-            
-            if (!$mod) {
-                return;
-            }
-        }
-
-        // Get available versions
-        $versions = $mod['versions'] ?? [];
-        $currentVersionNumber = $mod['currentVersionNumber'] ?? null;
+        $this->selectedModId = $modId;
+        $this->selectedVersion = null;
         
-        // You can use Filament's notification to show a modal for version selection
-        // This is a placeholder - you'll need to implement the actual version selection UI
-        $this->dispatch('open-modal', id: 'version-selector', data: [
-            'modId' => $modId,
-            'versions' => $versions,
-            'currentVersion' => $currentVersionNumber,
-        ]);
+        // Find the current version for this mod
+        $mod = collect($this->installedMods)->firstWhere('id', $modId);
+        if ($mod && isset($mod['version'])) {
+            $this->selectedVersion = $mod['version'];
+        }
+        
+        $this->dispatch('open-modal', id: 'version-selector');
     }
     
-    public function updateModVersion(string $modId, string $version): void
+    public function updateModVersion(): void
     {
+        if (empty($this->selectedModId) || empty($this->selectedVersion)) {
+            return;
+        }
+        
         $workshopVariable = $this->getWorkshopAddonsVariable();
         if (!$workshopVariable) {
             return;
@@ -272,14 +306,19 @@ class Workshop extends Page implements HasForms
         
         // Update version for the specified mod
         foreach ($existingMods as &$mod) {
-            if ($mod['id'] === $modId) {
-                $mod['version'] = $version;
+            if ($mod['id'] === $this->selectedModId) {
+                $mod['version'] = $this->selectedVersion;
                 break;
             }
         }
         
         $this->saveWorkshopAddons($existingMods);
         $this->loadInstalledMods();
+        
+        // Close the modal
+        $this->dispatch('close-modal', id: 'version-selector');
+        $this->selectedModId = null;
+        $this->selectedVersion = null;
     }
     
     public function generateModList(): array
