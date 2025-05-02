@@ -106,7 +106,7 @@
                                     <button
                                         type="button"
                                         @click="open = !open"
-                                        class="flex items-center justify-between px-3 py-2 h-9 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50"
+                                        class="flex items-center justify-between px-3 py-2 h-10.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50"
                                         style="min-width: 110px;"
                                     >
                                         <span>Tags ({{ count($selectedTags) }})</span>
