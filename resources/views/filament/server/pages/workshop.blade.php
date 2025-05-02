@@ -107,7 +107,7 @@
                                         type="button"
                                         color="gray"
                                         @click="open = !open"
-                                        class="flex items-center px-3"
+                                        class="flex items-center justify-between px-3"
                                         style="min-width: 110px;"
                                     >
                                         <span>Tags ({{ count($selectedTags) }})</span>
@@ -125,11 +125,11 @@
                                         x-transition:leave="transition ease-in duration-75"
                                         x-transition:leave-start="opacity-100 scale-100"
                                         x-transition:leave-end="opacity-0 scale-95"
-                                        class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-50 overflow-auto max-h-60"
+                                        class="absolute right-0 mt-2 w-64 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-50 overflow-auto max-h-60"
                                     >
                                         <div class="p-2">
                                             @foreach ($availableTags as $tag)
-                                                <label class="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                                <label class="flex items-center space-x-2 p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded">
                                                     <input 
                                                         type="checkbox" 
                                                         wire:model.live="selectedTags" 
