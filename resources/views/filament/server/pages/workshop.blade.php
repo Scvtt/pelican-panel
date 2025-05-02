@@ -102,36 +102,51 @@
                             </select>
                             
                             @if (!empty($availableTags))
-                                <x-filament::dropdown placement="bottom-end" min-width="w-64">
-                                    <x-slot name="trigger" class="ml-2">
-                                        <x-filament::button
-                                            type="button"
-                                            color="gray"
-                                            class="flex items-center px-3"
-                                            style="min-width: 110px;"
-                                        >
-                                            <span>Tags ({{ count($selectedTags) }})</span>
-                                            <x-filament::icon
-                                                name="heroicon-m-chevron-down"
-                                                class="ml-2 -mr-1 h-4 w-4"
-                                            />
-                                        </x-filament::button>
-                                    </x-slot>
+                                <div x-data="{ open: false }" class="relative">
+                                    <x-filament::button
+                                        type="button"
+                                        color="gray"
+                                        @click="open = !open"
+                                        class="flex items-center px-3"
+                                        style="min-width: 110px;"
+                                    >
+                                        <span>Tags ({{ count($selectedTags) }})</span>
+                                        <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </x-filament::button>
                                     
-                                    <div class="p-2 max-h-60 overflow-y-auto">
-                                        @foreach ($availableTags as $tag)
-                                            <x-filament::dropdown.item
-                                                wire:key="tag-{{ $tag }}"
-                                                icon="{{ in_array($tag, $selectedTags) ? 'heroicon-m-check-circle' : '' }}"
-                                                icon-position="after"
-                                                class="flex items-center space-x-2"
-                                                wire:click="toggleTag('{{ $tag }}')"
-                                            >
-                                                {{ $tag }}
-                                            </x-filament::dropdown.item>
-                                        @endforeach
+                                    <div 
+                                        x-show="open" 
+                                        @click.away="open = false"
+                                        x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 scale-95"
+                                        x-transition:enter-end="opacity-100 scale-100"
+                                        x-transition:leave="transition ease-in duration-75"
+                                        x-transition:leave-start="opacity-100 scale-100"
+                                        x-transition:leave-end="opacity-0 scale-95"
+                                        class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-50 overflow-auto max-h-60"
+                                    >
+                                        <div class="p-2">
+                                            @foreach ($availableTags as $tag)
+                                                <button 
+                                                    wire:click="toggleTag('{{ $tag }}')"
+                                                    type="button"
+                                                    class="flex items-center w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 {{ in_array($tag, $selectedTags) ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}"
+                                                >
+                                                    @if (in_array($tag, $selectedTags))
+                                                        <svg class="w-4 h-4 mr-2 text-primary-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    @else
+                                                        <div class="w-4 h-4 mr-2"></div>
+                                                    @endif
+                                                    {{ $tag }}
+                                                </button>
+                                            @endforeach
+                                        </div>
                                     </div>
-                                </x-filament::dropdown>
+                                </div>
                             @endif
                         </div>
                     </div>
