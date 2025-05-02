@@ -17,7 +17,7 @@
                     :active="$activeTab === $tabKey"
                     :badge="$tab->getBadge()"
                     :icon="$tab->getIcon()"
-                    :href="$tab->getUrl() ?? $this->getTabUrl($tabKey)"
+                    :href="$this->getTabUrl($tabKey)"
                     :id="$tabKey"
                     wire:click="$set('activeTab', '{{ $tabKey }}')"
                 >
