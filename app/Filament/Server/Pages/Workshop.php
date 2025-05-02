@@ -419,4 +419,10 @@ class Workshop extends Page implements HasForms
             'variable_value' => $modService->generateWorkshopAddons($modData)
         ]);
     }
+    
+    public function updatedCurrentSort(): void
+    {
+        $this->currentPage = 1; // Reset to first page when sort changes
+        $this->loadMods();
+    }
 } 
