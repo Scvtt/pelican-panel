@@ -104,7 +104,7 @@
                             <button
                                 type="button"
                                 wire:click="toggleSortDirection"
-                                class="p-2 h-11 w-11 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50"
+                                class="flex items-center justify-center p-2 h-11 w-11 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50"
                                 title="{{ $sortAscending ? 'Sort Descending' : 'Sort Ascending' }}"
                             >
                                 @if($sortAscending)
