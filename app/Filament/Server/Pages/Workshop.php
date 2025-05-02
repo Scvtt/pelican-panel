@@ -234,6 +234,32 @@ class Workshop extends Page implements HasForms
         $this->loadInstalledMods();
     }
     
+    public function showVersionSelect(string $modId): void
+    {
+        $mod = collect($this->availableMods)->firstWhere('id', $modId);
+
+        if (!$mod) {
+            // Try to find in installed mods
+            $mod = collect($this->installedMods)->firstWhere('id', $modId);
+            
+            if (!$mod) {
+                return;
+            }
+        }
+
+        // Get available versions
+        $versions = $mod['versions'] ?? [];
+        $currentVersionNumber = $mod['currentVersionNumber'] ?? null;
+        
+        // You can use Filament's notification to show a modal for version selection
+        // This is a placeholder - you'll need to implement the actual version selection UI
+        $this->dispatch('open-modal', id: 'version-selector', data: [
+            'modId' => $modId,
+            'versions' => $versions,
+            'currentVersion' => $currentVersionNumber,
+        ]);
+    }
+    
     public function updateModVersion(string $modId, string $version): void
     {
         $workshopVariable = $this->getWorkshopAddonsVariable();
