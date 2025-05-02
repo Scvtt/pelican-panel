@@ -12,6 +12,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
+use Filament\Resources\Components\Tab;
 
 class Workshop extends Page implements HasForms
 {
@@ -31,7 +32,6 @@ class Workshop extends Page implements HasForms
     public array $selectedTags = [];
     public int $currentPage = 1;
     public int $totalPages = 1;
-    public string $currentTab = 'available';
     
     public function mount(): void
     {
@@ -40,15 +40,20 @@ class Workshop extends Page implements HasForms
             redirect()->to(Filament::getUrl());
         }
         
-        $tab = request()->query('tab', 'available');
-        if (!in_array($tab, ['available', 'installed'])) {
-            $tab = 'available';
-        }
-        $this->currentTab = $tab;
-        
         $this->loadMods();
         $this->loadInstalledMods();
         $this->loadTags();
+    }
+    
+    public function getTabs(): array
+    {
+        return [
+            'available' => Tab::make('Available Mods')
+                ->badge(count($this->availableMods) > 0 ? $this->totalPages * 12 : 0),
+                
+            'installed' => Tab::make('Installed Mods')
+                ->badge(count($this->installedMods)),
+        ];
     }
     
     // This ensures the page appears in navigation only when the feature flag is enabled

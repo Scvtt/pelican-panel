@@ -11,23 +11,23 @@
             Manage mods and configurations for your Arma Reforger server through this Workshop interface.
         </p>
 
-        <!-- Tabs Navigation -->
-        <div class="mb-6 flex justify-center">
-            <div class="inline-flex bg-gray-200 dark:bg-gray-700 rounded-full p-1">
-                <a href="?tab=available" class="px-4 py-2 rounded-full font-medium text-sm focus:outline-none {{ $currentTab === 'available' ? 'bg-primary-500 text-white shadow' : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white' }}">
-                    Available Mods
-                </a>
-                <a href="?tab=installed" class="px-4 py-2 rounded-full font-medium text-sm focus:outline-none flex items-center {{ $currentTab === 'installed' ? 'bg-primary-500 text-white shadow' : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white' }}">
-                    Installed Mods
-                    <span class="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs rounded-full {{ $currentTab === 'installed' ? 'bg-white text-primary-700' : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300' }}">
-                        {{ count($installedMods) }}
-                    </span>
-                </a>
-            </div>
-        </div>
+        <x-filament::tabs>
+            @foreach ($this->getTabs() as $tabKey => $tab)
+                <x-filament::tabs.item
+                    :active="$activeTab === $tabKey"
+                    :badge="$tab->getBadge()"
+                    :icon="$tab->getIcon()"
+                    :href="$tab->getUrl() ?? $this->getTabUrl($tabKey)"
+                    :id="$tabKey"
+                    wire:click="$set('activeTab', '{{ $tabKey }}')"
+                >
+                    {{ $tab->getLabel() }}
+                </x-filament::tabs.item>
+            @endforeach
+        </x-filament::tabs>
 
-        <div class="grid grid-cols-1 gap-6">
-            @if ($currentTab === 'installed')
+        <div class="grid grid-cols-1 gap-6 mt-6">
+            @if ($activeTab === 'installed')
                 <!-- Installed Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
                     <div class="flex items-center justify-between mb-5">
@@ -80,7 +80,7 @@
                         </div>
                     @endif
                 </div>
-            @elseif ($currentTab === 'available')
+            @elseif ($activeTab === 'available')
                 <!-- Available Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
                     <div class="flex items-center justify-between mb-5">
