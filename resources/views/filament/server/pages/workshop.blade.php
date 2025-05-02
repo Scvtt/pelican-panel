@@ -1,27 +1,29 @@
 <x-filament-panels::page>
     <div class="p-6 bg-white dark:bg-gray-900 rounded-lg shadow">
-        <div class="flex items-center space-x-4 mb-4">
-            <p class="text-gray-600 dark:text-gray-400 mb-6">
+        <div class="mb-6 text-center">
+            <p class="text-gray-600 dark:text-gray-400">
                 Manage mods and configurations for your Arma Reforger server through this Workshop interface.
             </p>
         </div>
         
-        <x-filament::tabs>
-            @foreach ($this->getTabs() as $tabKey => $tab)
-                <x-filament::tabs.item
-                    :active="$activeTab === $tabKey"
-                    :badge="$tab->getBadge()"
-                    :icon="$tab->getIcon()"
-                    :href="$this->getTabUrl($tabKey)"
-                    :id="$tabKey"
-                    wire:click="$set('activeTab', '{{ $tabKey }}')"
-                >
-                    {{ $tab->getLabel() }}
-                </x-filament::tabs.item>
-            @endforeach
-        </x-filament::tabs>
+        <div class="flex justify-center mb-6">
+            <x-filament::tabs>
+                @foreach ($this->getTabs() as $tabKey => $tab)
+                    <x-filament::tabs.item
+                        :active="$activeTab === $tabKey"
+                        :badge="$tab->getBadge()"
+                        :icon="$tab->getIcon()"
+                        :href="$this->getTabUrl($tabKey)"
+                        :id="$tabKey"
+                        wire:click="$set('activeTab', '{{ $tabKey }}')"
+                    >
+                        {{ $tab->getLabel() }}
+                    </x-filament::tabs.item>
+                @endforeach
+            </x-filament::tabs>
+        </div>
 
-        <div class="grid grid-cols-1 gap-6 mt-6">
+        <div class="grid grid-cols-1 gap-6">
             @if ($activeTab === 'installed')
                 <!-- Installed Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
