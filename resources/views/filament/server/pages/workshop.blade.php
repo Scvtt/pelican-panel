@@ -250,12 +250,19 @@
             </x-slot>
             
             <div class="space-y-4">
-                <x-filament::input.wrapper>
+                <x-filament::input.wrapper id="selectedVersion" label="Version" required>
+                    <x-filament::input.wrapper.label>
+                        Version Number
+                    </x-filament::input.wrapper.label>
                     <x-filament::input
+                        id="selectedVersion"
                         wire:model="selectedVersion"
                         type="text"
                         placeholder="Enter version (e.g., 1.0.0)"
                     />
+                    <x-filament::input.wrapper.hint>
+                        Specify the exact version number you want to install
+                    </x-filament::input.wrapper.hint>
                 </x-filament::input.wrapper>
             </div>
             

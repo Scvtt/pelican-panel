@@ -13,6 +13,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 use Filament\Resources\Components\Tab;
+use Filament\Notifications\Notification;
 
 class Workshop extends Page implements HasForms
 {
@@ -292,7 +293,18 @@ class Workshop extends Page implements HasForms
     
     public function updateModVersion(): void
     {
-        if (empty($this->selectedModId) || empty($this->selectedVersion)) {
+        if (empty($this->selectedModId)) {
+            return;
+        }
+        
+        // Validate the version format
+        if (empty($this->selectedVersion) || !preg_match('/^\d+(\.\d+)*$/', $this->selectedVersion)) {
+            // Show an error notification for invalid version format
+            Notification::make()
+                ->danger()
+                ->title('Invalid Version Format')
+                ->body('Please enter a valid version number (e.g., 1.0.0)')
+                ->send();
             return;
         }
         
@@ -314,6 +326,13 @@ class Workshop extends Page implements HasForms
         
         $this->saveWorkshopAddons($existingMods);
         $this->loadInstalledMods();
+        
+        // Show success notification
+        Notification::make()
+            ->success()
+            ->title('Version Updated')
+            ->body("Mod version has been updated to {$this->selectedVersion}")
+            ->send();
         
         // Close the modal
         $this->dispatch('close-modal', id: 'version-selector');
