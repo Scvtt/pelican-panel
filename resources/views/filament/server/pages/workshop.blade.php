@@ -250,11 +250,13 @@
             </x-slot>
             
             <div class="space-y-4">
-                <x-filament::input
-                    wire:model="selectedVersion"
-                    type="text"
-                    placeholder="Enter version (e.g., 1.0.0)"
-                />
+                <x-filament::input.wrapper>
+                    <x-filament::input
+                        wire:model="selectedVersion"
+                        type="text"
+                        placeholder="Enter version (e.g., 1.0.0)"
+                    />
+                </x-filament::input.wrapper>
             </div>
             
             <x-slot name="footerActions">
