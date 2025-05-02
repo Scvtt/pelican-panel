@@ -166,7 +166,7 @@
                                                     size="sm"
                                                     icon="tabler-versions"
                                                 >
-                                                    Ver
+                                                    Versions
                                                 </x-filament::button>
                                                 
                                                 <x-filament::button
@@ -238,30 +238,30 @@
                 </div>
             @endif
         </div>
+        
+        <!-- Version Selection Modal -->
+        <x-filament::modal id="version-selector" width="md">
+            <x-slot name="heading">
+                Select Version
+            </x-slot>
+            
+            <x-slot name="description">
+                Choose a specific version for this mod
+            </x-slot>
+            
+            <div id="version-list" class="space-y-2">
+                <!-- Will be populated dynamically -->
+                <p class="text-sm text-gray-500">Loading versions...</p>
+            </div>
+            
+            <x-slot name="footerActions">
+                <x-filament::button
+                    color="gray"
+                    x-on:click="$dispatch('close-modal', { id: 'version-selector' })"
+                >
+                    Cancel
+                </x-filament::button>
+            </x-slot>
+        </x-filament::modal>
     </div>
-</x-filament-panels::page>
-
-<!-- Version Selection Modal -->
-<x-filament::modal id="version-selector" width="md">
-    <x-slot name="heading">
-        Select Version
-    </x-slot>
-    
-    <x-slot name="description">
-        Choose a specific version for this mod
-    </x-slot>
-    
-    <div id="version-list" class="space-y-2">
-        <!-- Will be populated dynamically -->
-        <p class="text-sm text-gray-500">Loading versions...</p>
-    </div>
-    
-    <x-slot name="footerActions">
-        <x-filament::button
-            color="gray"
-            x-on:click="$dispatch('close-modal', { id: 'version-selector' })"
-        >
-            Cancel
-        </x-filament::button>
-    </x-slot>
-</x-filament::modal> 
+</x-filament-panels::page> 
