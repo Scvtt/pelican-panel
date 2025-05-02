@@ -32,6 +32,7 @@ class Workshop extends Page implements HasForms
     public array $selectedTags = [];
     public int $currentPage = 1;
     public int $totalPages = 1;
+    public string $activeTab = 'available';
     
     public function mount(): void
     {
@@ -40,9 +41,19 @@ class Workshop extends Page implements HasForms
             redirect()->to(Filament::getUrl());
         }
         
+        $this->activeTab = request()->query('tab', 'available');
+        if (!in_array($this->activeTab, ['available', 'installed'])) {
+            $this->activeTab = 'available';
+        }
+        
         $this->loadMods();
         $this->loadInstalledMods();
         $this->loadTags();
+    }
+    
+    public function getTabUrl(string $tab): string
+    {
+        return url(request()->url() . '?tab=' . $tab);
     }
     
     public function getTabs(): array
