@@ -82,6 +82,11 @@ class Workshop extends Page implements HasForms
      */
     public ?string $selectedVersion = null;
     
+    /**
+     * Search term for filtering mods
+     */
+    public string $searchTerm = '';
+    
     public function mount(): void
     {
         // Check if this server's egg has the AR_WORKSHOP feature flag enabled
@@ -163,7 +168,7 @@ class Workshop extends Page implements HasForms
     {
         try {
             $modService = app(ReforgerModService::class);
-            $result = $modService->getMods($this->currentSort, $this->selectedTags, $this->currentPage, $this->sortAscending);
+            $result = $modService->getMods($this->currentSort, $this->selectedTags, $this->currentPage, $this->sortAscending, $this->searchTerm);
             
             $this->availableMods = $result['data'] ?? [];
             $this->exportedTime = $result['exported'] ?? now()->format('Y-m-d H:i:s');
@@ -435,6 +440,12 @@ class Workshop extends Page implements HasForms
     {
         $this->sortAscending = !$this->sortAscending;
         $this->currentPage = 1; // Reset to first page when sort direction changes
+        $this->loadMods();
+    }
+    
+    public function updatedSearchTerm(): void
+    {
+        $this->currentPage = 1; // Reset to first page when search changes
         $this->loadMods();
     }
 } 

@@ -91,6 +91,22 @@
                     <div class="flex items-center justify-between mb-5">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white">Available Mods</h3>
                         <div class="flex space-x-2 items-center">
+                            <div class="relative">
+                                <x-filament::input.wrapper>
+                                    <x-filament::input
+                                        type="search"
+                                        wire:model.live.debounce.300ms="searchTerm"
+                                        placeholder="Search mods..."
+                                        class="pr-10"
+                                    />
+                                    <span class="absolute inset-y-0 right-0 flex items-center justify-center pr-3 text-gray-500 dark:text-gray-400">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                    </span>
+                                </x-filament::input.wrapper>
+                            </div>
+                            
                             <select 
                                 wire:model.live="currentSort"
                                 class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50"

@@ -23,13 +23,26 @@ class ReforgerModService
      * @param array|null $tags
      * @param int $page
      * @param bool $sortAscending
+     * @param string $searchTerm
      * @return array
      */
-    public function getMods(?string $sort = 'popular', ?array $tags = null, int $page = 1, bool $sortAscending = false): array
+    public function getMods(?string $sort = 'popular', ?array $tags = null, int $page = 1, bool $sortAscending = false, string $searchTerm = ''): array
     {
         // Cache the entire workshop data for 5 minutes
         $workshopData = $this->getWorkshopData();
         $mods = $workshopData['data'] ?? [];
+        
+        // Filter by search term if provided
+        if (!empty($searchTerm)) {
+            $searchTerm = strtolower($searchTerm);
+            $mods = array_filter($mods, function($mod) use ($searchTerm) {
+                return str_contains(strtolower($mod['name'] ?? ''), $searchTerm) || 
+                       str_contains(strtolower($mod['author'] ?? ''), $searchTerm) ||
+                       (isset($mod['description']) && str_contains(strtolower($mod['description']), $searchTerm));
+            });
+            // Re-index array after filtering
+            $mods = array_values($mods);
+        }
         
         // Filter by tags if provided
         if (!empty($tags)) {
