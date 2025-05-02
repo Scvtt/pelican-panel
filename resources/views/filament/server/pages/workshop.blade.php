@@ -24,7 +24,7 @@
                     <div class="flex items-center justify-between mb-5">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white">Installed Mods</h3>
                         <div class="text-xs text-gray-500 dark:text-gray-400">
-                            Mods are stored in the WORKSHOP_ADDONS egg variable
+                            This feature is experimental, if you remove all mods you will need to clear your config.json file.
                         </div>
                     </div>
                     
@@ -57,6 +57,7 @@
                                                     wire:click="uninstallMod('{{ $mod['id'] }}')"
                                                     color="danger"
                                                     size="sm"
+                                                    icon="tabler-trash"
                                                 >
                                                     Remove
                                                 </x-filament::button>
@@ -150,6 +151,7 @@
                                                 wire:click="uninstallMod('{{ $mod['id'] }}')"
                                                 color="danger"
                                                 size="sm"
+                                                icon="tabler-trash"
                                             >
                                                 Uninstall
                                             </x-filament::button>
@@ -159,6 +161,7 @@
                                                 wire:click="installMod('{{ $mod['id'] }}')"
                                                 color="primary"
                                                 size="sm"
+                                                icon="tabler-download"
                                             >
                                                 Install
                                             </x-filament::button>
