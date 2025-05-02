@@ -55,7 +55,7 @@
                                                 <button 
                                                     type="button" 
                                                     wire:click="uninstallMod('{{ $mod['id'] }}')"
-                                                    class="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600"
+                                                    class="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
                                                 >
                                                     Remove
                                                 </button>
@@ -145,7 +145,7 @@
                                             <button 
                                                 type="button"
                                                 wire:click="uninstallMod('{{ $mod['id'] }}')"
-                                                class="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600"
+                                                class="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
                                             >
                                                 Uninstall
                                             </button>
