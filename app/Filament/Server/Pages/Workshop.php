@@ -31,6 +31,7 @@ class Workshop extends Page implements HasForms
     public array $selectedTags = [];
     public int $currentPage = 1;
     public int $totalPages = 1;
+    public string $currentTab = 'available';
     
     public function mount(): void
     {
@@ -38,6 +39,12 @@ class Workshop extends Page implements HasForms
         if (!$this->canAccessWorkshop()) {
             redirect()->to(Filament::getUrl());
         }
+        
+        $tab = request()->query('tab', 'available');
+        if (!in_array($tab, ['available', 'installed'])) {
+            $tab = 'available';
+        }
+        $this->currentTab = $tab;
         
         $this->loadMods();
         $this->loadInstalledMods();
