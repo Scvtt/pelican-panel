@@ -12,13 +12,18 @@
         </p>
 
         <!-- Tabs Navigation -->
-        <div class="mb-6 flex space-x-2">
-            <a href="?tab=available" class="px-4 py-2 rounded-t-md font-medium focus:outline-none {{ $currentTab === 'available' ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">
-                Available Mods
-            </a>
-            <a href="?tab=installed" class="px-4 py-2 rounded-t-md font-medium focus:outline-none {{ $currentTab === 'installed' ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">
-                Installed Mods
-            </a>
+        <div class="mb-6 flex justify-center">
+            <div class="inline-flex bg-gray-200 dark:bg-gray-700 rounded-full p-1">
+                <a href="?tab=available" class="px-4 py-2 rounded-full font-medium text-sm focus:outline-none {{ $currentTab === 'available' ? 'bg-primary-500 text-white shadow' : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white' }}">
+                    Available Mods
+                </a>
+                <a href="?tab=installed" class="px-4 py-2 rounded-full font-medium text-sm focus:outline-none flex items-center {{ $currentTab === 'installed' ? 'bg-primary-500 text-white shadow' : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white' }}">
+                    Installed Mods
+                    <span class="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs rounded-full {{ $currentTab === 'installed' ? 'bg-white text-primary-700' : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300' }}">
+                        {{ count($installedMods) }}
+                    </span>
+                </a>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 gap-6">
