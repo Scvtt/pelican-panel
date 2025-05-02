@@ -107,9 +107,10 @@
                                         type="button"
                                         color="gray"
                                         @click="open = !open"
-                                        class="flex items-center"
+                                        class="flex items-center px-3"
+                                        style="min-width: 110px;"
                                     >
-                                        Tags ({{ count($selectedTags) }})
+                                        <span>Tags ({{ count($selectedTags) }})</span>
                                         <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                         </svg>
@@ -128,14 +129,14 @@
                                     >
                                         <div class="p-2">
                                             @foreach ($availableTags as $tag)
-                                                <label class="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                                <label class="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
                                                     <input 
                                                         type="checkbox" 
                                                         wire:model.live="selectedTags" 
                                                         value="{{ $tag }}"
                                                         class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:focus:border-primary-600 dark:focus:ring-primary-600"
                                                     >
-                                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ $tag }}</span>
+                                                    <span class="text-sm text-gray-900 dark:text-white">{{ $tag }}</span>
                                                 </label>
                                             @endforeach
                                         </div>
