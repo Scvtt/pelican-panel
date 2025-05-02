@@ -137,8 +137,8 @@
                                     @if (!empty($mod['tags']))
                                         <div class="flex flex-wrap gap-1 mb-3">
                                             @php
-                                                $displayTags = array_slice($mod['tags'], 0, 4);
-                                                $hasMoreTags = count($mod['tags']) > 4;
+                                                $displayTags = array_slice($mod['tags'], 0, 3);
+                                                $hasMoreTags = count($mod['tags']) > 3;
                                             @endphp
 
                                             @foreach ($displayTags as $tag)
@@ -149,7 +149,7 @@
 
                                             @if ($hasMoreTags)
                                                 <span class="text-xs px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
-                                                    +{{ count($mod['tags']) - 4 }} more
+                                                    +{{ count($mod['tags']) - 3 }} more
                                                 </span>
                                             @endif
                                         </div>
