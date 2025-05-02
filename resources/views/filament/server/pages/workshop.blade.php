@@ -1,11 +1,5 @@
 <x-filament-panels::page>
     <div class="p-6 bg-white dark:bg-gray-900 rounded-lg shadow">
-        <div class="mb-6 text-center">
-            <p class="text-gray-600 dark:text-gray-400">
-                Manage mods and configurations for your Arma Reforger server through this Workshop interface.
-            </p>
-        </div>
-        
         <div class="flex justify-center mb-6">
             <x-filament::tabs>
                 @foreach ($this->getTabs() as $tabKey => $tab)
