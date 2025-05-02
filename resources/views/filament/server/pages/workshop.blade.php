@@ -250,17 +250,21 @@
             </x-slot>
             
             <div class="space-y-4">
-                <x-filament::field-wrapper id="selectedVersion" label="Version Number">
-                    <x-filament::input
-                        id="selectedVersion"
-                        wire:model="selectedVersion"
-                        type="text"
-                        placeholder="Enter version (e.g., 1.0.0)"
-                    />
-                    <x-slot name="helperText">
+                <div class="grid gap-2">
+                    <label for="selectedVersion" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Version Number
+                    </label>
+                    <x-filament::input.wrapper>
+                        <x-filament::input
+                            wire:model="selectedVersion"
+                            type="text"
+                            placeholder="Enter version (e.g., 1.0.0)"
+                        />
+                    </x-filament::input.wrapper>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
                         Specify the exact version number you want to install
-                    </x-slot>
-                </x-filament::field-wrapper>
+                    </p>
+                </div>
             </div>
             
             <x-slot name="footerActions">
