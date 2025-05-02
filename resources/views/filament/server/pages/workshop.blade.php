@@ -102,7 +102,7 @@
                             </select>
                             
                             @if (!empty($availableTags))
-                                <div x-data="{ open: false }" class="relative">
+                                <div class="relative" x-data="{ open: false }">
                                     <x-filament::button
                                         type="button"
                                         color="gray"
@@ -129,20 +129,15 @@
                                     >
                                         <div class="p-2">
                                             @foreach ($availableTags as $tag)
-                                                <button 
-                                                    wire:click="toggleTag('{{ $tag }}')"
-                                                    type="button"
-                                                    class="flex items-center w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 {{ in_array($tag, $selectedTags) ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}"
-                                                >
-                                                    @if (in_array($tag, $selectedTags))
-                                                        <svg class="w-4 h-4 mr-2 text-primary-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                                        </svg>
-                                                    @else
-                                                        <div class="w-4 h-4 mr-2"></div>
-                                                    @endif
-                                                    {{ $tag }}
-                                                </button>
+                                                <label class="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        wire:model.live="selectedTags" 
+                                                        value="{{ $tag }}"
+                                                        class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:focus:border-primary-600 dark:focus:ring-primary-600"
+                                                    >
+                                                    <span class="text-sm text-gray-900 dark:text-white">{{ $tag }}</span>
+                                                </label>
                                             @endforeach
                                         </div>
                                     </div>
