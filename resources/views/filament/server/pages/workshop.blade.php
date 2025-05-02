@@ -1,16 +1,11 @@
 <x-filament-panels::page>
     <div class="p-6 bg-white dark:bg-gray-900 rounded-lg shadow">
         <div class="flex items-center space-x-4 mb-4">
-            <div class="rounded-lg bg-primary-50 dark:bg-primary-950/50 p-3">
-                <x-tabler-cube class="w-8 h-8 text-primary-500" />
-            </div>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Workshop</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Manage mods and configurations for your Arma Reforger server through this Workshop interface.
+            </p>
         </div>
         
-        <p class="text-gray-600 dark:text-gray-400 mb-6">
-            Manage mods and configurations for your Arma Reforger server through this Workshop interface.
-        </p>
-
         <x-filament::tabs>
             @foreach ($this->getTabs() as $tabKey => $tab)
                 <x-filament::tabs.item
