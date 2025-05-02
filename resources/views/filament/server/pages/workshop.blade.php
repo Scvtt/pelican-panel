@@ -60,7 +60,7 @@
                                                         size="sm"
                                                         icon="tabler-versions"
                                                     >
-                                                        Versions
+                                                        Version
                                                     </x-filament::button>
                                                     
                                                     <x-filament::button
@@ -166,7 +166,7 @@
                                                     size="sm"
                                                     icon="tabler-versions"
                                                 >
-                                                    Versions
+                                                    Version
                                                 </x-filament::button>
                                                 
                                                 <x-filament::button
@@ -246,15 +246,25 @@
             </x-slot>
             
             <x-slot name="description">
-                Choose a specific version for this mod
+                Enter the version number you want to install (e.g., 1.0.0)
             </x-slot>
             
-            <div id="version-list" class="space-y-2">
-                <!-- Will be populated dynamically -->
-                <p class="text-sm text-gray-500">Loading versions...</p>
+            <div class="space-y-4">
+                <x-filament::input
+                    wire:model="selectedVersion"
+                    type="text"
+                    placeholder="Enter version (e.g., 1.0.0)"
+                />
             </div>
             
             <x-slot name="footerActions">
+                <x-filament::button
+                    color="primary"
+                    wire:click="updateModVersion"
+                >
+                    Update Version
+                </x-filament::button>
+
                 <x-filament::button
                     color="gray"
                     x-on:click="$dispatch('close-modal', { id: 'version-selector' })"
