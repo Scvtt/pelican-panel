@@ -103,18 +103,17 @@
                             
                             @if (!empty($availableTags))
                                 <div class="relative" x-data="{ open: false }">
-                                    <x-filament::button
+                                    <button
                                         type="button"
-                                        color="gray"
                                         @click="open = !open"
-                                        class="flex items-center justify-between px-3"
+                                        class="flex items-center justify-between px-3 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50"
                                         style="min-width: 110px;"
                                     >
                                         <span>Tags ({{ count($selectedTags) }})</span>
-                                        <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                         </svg>
-                                    </x-filament::button>
+                                    </button>
                                     
                                     <div 
                                         x-show="open" 
