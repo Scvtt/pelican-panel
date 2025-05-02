@@ -22,9 +22,10 @@ class ReforgerModService
      * @param string|null $sort
      * @param array|null $tags
      * @param int $page
+     * @param bool $sortAscending
      * @return array
      */
-    public function getMods(?string $sort = 'popular', ?array $tags = null, int $page = 1): array
+    public function getMods(?string $sort = 'popular', ?array $tags = null, int $page = 1, bool $sortAscending = false): array
     {
         // Cache the entire workshop data for 5 minutes
         $workshopData = $this->getWorkshopData();
@@ -47,20 +48,29 @@ class ReforgerModService
         
         // Sort the mods
         if ($sort === 'popular') {
-            usort($mods, function($a, $b) {
-                return ($b['subscriberCount'] ?? 0) <=> ($a['subscriberCount'] ?? 0);
+            usort($mods, function($a, $b) use ($sortAscending) {
+                $comparison = ($b['subscriberCount'] ?? 0) <=> ($a['subscriberCount'] ?? 0);
+                return $sortAscending ? -$comparison : $comparison;
             });
         } elseif ($sort === 'rating') {
-            usort($mods, function($a, $b) {
-                return ($b['averageRating'] ?? 0) <=> ($a['averageRating'] ?? 0);
+            usort($mods, function($a, $b) use ($sortAscending) {
+                $comparison = ($b['averageRating'] ?? 0) <=> ($a['averageRating'] ?? 0);
+                return $sortAscending ? -$comparison : $comparison;
             });
         } elseif ($sort === 'newest') {
-            usort($mods, function($a, $b) {
-                return strtotime($b['createdAt'] ?? 0) <=> strtotime($a['createdAt'] ?? 0);
+            usort($mods, function($a, $b) use ($sortAscending) {
+                $comparison = strtotime($b['createdAt'] ?? 0) <=> strtotime($a['createdAt'] ?? 0);
+                return $sortAscending ? -$comparison : $comparison;
             });
         } elseif ($sort === 'updated') {
-            usort($mods, function($a, $b) {
-                return strtotime($b['updatedAt'] ?? 0) <=> strtotime($a['updatedAt'] ?? 0);
+            usort($mods, function($a, $b) use ($sortAscending) {
+                $comparison = strtotime($b['updatedAt'] ?? 0) <=> strtotime($a['updatedAt'] ?? 0);
+                return $sortAscending ? -$comparison : $comparison;
+            });
+        } elseif ($sort === 'alphabetical') {
+            usort($mods, function($a, $b) use ($sortAscending) {
+                $comparison = strcasecmp($a['name'] ?? '', $b['name'] ?? '');
+                return $sortAscending ? $comparison : -$comparison;
             });
         }
         

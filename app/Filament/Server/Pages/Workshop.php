@@ -58,6 +58,11 @@ class Workshop extends Page implements HasForms
     public string $currentSort = 'popular';
     
     /**
+     * Current sort direction (true = ascending, false = descending)
+     */
+    public bool $sortAscending = false;
+    
+    /**
      * Total pages for pagination
      */
     public int $totalPages = 1;
@@ -158,7 +163,7 @@ class Workshop extends Page implements HasForms
     {
         try {
             $modService = app(ReforgerModService::class);
-            $result = $modService->getMods($this->currentSort, $this->selectedTags, $this->currentPage);
+            $result = $modService->getMods($this->currentSort, $this->selectedTags, $this->currentPage, $this->sortAscending);
             
             $this->availableMods = $result['data'] ?? [];
             $this->exportedTime = $result['exported'] ?? now()->format('Y-m-d H:i:s');
@@ -423,6 +428,13 @@ class Workshop extends Page implements HasForms
     public function updatedCurrentSort(): void
     {
         $this->currentPage = 1; // Reset to first page when sort changes
+        $this->loadMods();
+    }
+    
+    public function toggleSortDirection(): void
+    {
+        $this->sortAscending = !$this->sortAscending;
+        $this->currentPage = 1; // Reset to first page when sort direction changes
         $this->loadMods();
     }
 } 
