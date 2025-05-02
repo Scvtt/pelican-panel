@@ -58,13 +58,28 @@ class Workshop extends Page implements HasForms
     
     public function getTabs(): array
     {
+        $totalAvailableMods = 0;
+        
+        if (count($this->availableMods) > 0) {
+            // If we have mods and pagination, calculate the total
+            $totalAvailableMods = isset($this->totalPages) ? 
+                min($this->totalPages * 12, 99) : // Cap at 99+ to avoid UI issues
+                count($this->availableMods);
+        }
+        
         return [
             'available' => Tab::make('Available Mods')
-                ->badge(count($this->availableMods) > 0 ? $this->totalPages * 12 : 0),
+                ->badge($totalAvailableMods),
                 
             'installed' => Tab::make('Installed Mods')
                 ->badge(count($this->installedMods)),
         ];
+    }
+    
+    public function updatedActiveTab(): void
+    {
+        // Update the URL to reflect the current tab
+        $this->dispatch('urlChanged', url: $this->getTabUrl($this->activeTab));
     }
     
     // This ensures the page appears in navigation only when the feature flag is enabled
