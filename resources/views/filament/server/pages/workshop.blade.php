@@ -52,15 +52,27 @@
                                                 {{ $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest' }}
                                             </td>
                                             <td class="py-2 px-4">
-                                                <x-filament::button
-                                                    type="button" 
-                                                    wire:click="uninstallMod('{{ $mod['id'] }}')"
-                                                    color="danger"
-                                                    size="sm"
-                                                    icon="tabler-trash"
-                                                >
-                                                    Remove
-                                                </x-filament::button>
+                                                <div class="flex space-x-2">
+                                                    <x-filament::button
+                                                        type="button"
+                                                        wire:click="showVersionSelect('{{ $mod['id'] }}')"
+                                                        color="gray"
+                                                        size="sm"
+                                                        icon="tabler-versions"
+                                                    >
+                                                        Version
+                                                    </x-filament::button>
+                                                    
+                                                    <x-filament::button
+                                                        type="button" 
+                                                        wire:click="uninstallMod('{{ $mod['id'] }}')"
+                                                        color="danger"
+                                                        size="sm"
+                                                        icon="tabler-trash"
+                                                    >
+                                                        Remove
+                                                    </x-filament::button>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -146,15 +158,27 @@
                                             $isInstalled = collect($installedMods)->contains('id', $mod['id']);
                                         @endphp
                                         @if ($isInstalled)
-                                            <x-filament::button
-                                                type="button"
-                                                wire:click="uninstallMod('{{ $mod['id'] }}')"
-                                                color="danger"
-                                                size="sm"
-                                                icon="tabler-trash"
-                                            >
-                                                Uninstall
-                                            </x-filament::button>
+                                            <div class="flex space-x-2">
+                                                <x-filament::button
+                                                    type="button"
+                                                    wire:click="showVersionSelect('{{ $mod['id'] }}')"
+                                                    color="gray"
+                                                    size="sm"
+                                                    icon="tabler-versions"
+                                                >
+                                                    Version
+                                                </x-filament::button>
+                                                
+                                                <x-filament::button
+                                                    type="button"
+                                                    wire:click="uninstallMod('{{ $mod['id'] }}')"
+                                                    color="danger"
+                                                    size="sm"
+                                                    icon="tabler-trash"
+                                                >
+                                                    Uninstall
+                                                </x-filament::button>
+                                            </div>
                                         @else
                                             <x-filament::button
                                                 type="button"
