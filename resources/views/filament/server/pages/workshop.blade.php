@@ -153,7 +153,7 @@
                                             <button 
                                                 type="button"
                                                 wire:click="installMod('{{ $mod['id'] }}')"
-                                                class="px-3 py-1 bg-primary-500 text-white text-sm rounded hover:bg-primary-600"
+                                                class="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600"
                                             >
                                                 Install
                                             </button>
