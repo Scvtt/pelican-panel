@@ -22,7 +22,9 @@
                 <!-- Installed Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
                     @if (count($installedMods) > 0)
-                        {{ $this->table }}
+                        <div class="mt-1">
+                            {{ $this->table }}
+                        </div>
                     @else
                         <div class="py-4 text-center text-gray-500 dark:text-gray-400">
                             No mods are currently installed. Browse available mods below to add them.

@@ -598,4 +598,15 @@ class Workshop extends Page implements HasForms, HasTable
             ->emptyStateDescription('Browse available mods to add them to your server.')
             ->paginated(false);
     }
+
+    /**
+     * Process data updates from Livewire
+     */
+    protected function afterUpdated($name, $value): void
+    {
+        // If the installed mods changed, make sure the table data is fresh
+        if ($name === 'installedMods') {
+            $this->resetTable();
+        }
+    }
 } 
