@@ -606,4 +606,28 @@ class Workshop extends Page implements HasForms, HasTable
         }
     }
 
+    /**
+     * Get a unique record key for a table record.
+     * 
+     * @param \Illuminate\Database\Eloquent\Model $record
+     * @return string
+     */
+    public function getTableRecordKey(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        // In Filament v3, with our table data being array-based but passed as
+        // a stdClass when filtered through the table builder,
+        // we need to check and convert the record to an array
+        if (is_object($record) && method_exists($record, 'toArray')) {
+            $data = $record->toArray();
+        } elseif (is_object($record)) {
+            // If it's a stdClass or similar, convert to array
+            $data = (array)$record;
+        } else {
+            $data = $record;
+        }
+        
+        // Get the ID if it exists, or generate a unique ID
+        return (string)($data['id'] ?? uniqid());
+    }
+
 } 
