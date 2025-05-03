@@ -22,6 +22,14 @@ use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\DB;
 use App\Models\ArrayMod;
+use Filament\Forms\Form;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Grid;
+use Filament\Support\Exceptions\Halt;
+use App\Models\Variable;
+use Illuminate\Support\Str;
+use Livewire\Component;
 
 class Workshop extends Page implements HasForms, HasTable
 {
@@ -511,11 +519,112 @@ class Workshop extends Page implements HasForms, HasTable
         $this->dispatch('close-modal', id: 'confirm-bulk-uninstall');
     }
     
-    /**
-     * Get records for the table - this is used by the Blade template directly
-     */
-    public function getInstalledMods()
+    public function table(Table $table): Table
     {
-        return $this->installedMods;
+        return $table
+            ->query(fn () => ArrayMod::query())
+            ->columns([
+                TextColumn::make('name')
+                    ->searchable(),
+                TextColumn::make('author')
+                    ->searchable(),
+                TextColumn::make('version')
+                    ->searchable(),
+            ])
+            ->actions([
+                Action::make('version')
+                    ->label('Version')
+                    ->color('gray')
+                    ->icon('tabler-versions')
+                    ->action(fn ($record) => $this->showVersionSelect($record['id'])),
+                Action::make('uninstall')
+                    ->label('Remove')
+                    ->color('danger')
+                    ->icon('tabler-trash')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $this->uninstallMod($record['id'])),
+            ])
+            ->bulkActions([
+                BulkAction::make('remove')
+                    ->label('Remove selected')
+                    ->color('danger')
+                    ->icon('tabler-trash')
+                    ->requiresConfirmation()
+                    ->action(function (Collection $records): void {
+                        // Get all selected mod IDs
+                        $modIds = $records->pluck('id')->toArray();
+                        
+                        // Get existing mods
+                        $workshopVariable = $this->getWorkshopAddonsVariable();
+                        if (!$workshopVariable) {
+                            return;
+                        }
+                        
+                        $modService = app(ReforgerModService::class);
+                        $existingMods = $modService->parseWorkshopAddons($workshopVariable->variable_value);
+                        
+                        // Filter out the mods to uninstall
+                        $filteredMods = array_filter($existingMods, function ($mod) use ($modIds) {
+                            return !in_array($mod['id'], $modIds);
+                        });
+                        
+                        // Save the filtered list
+                        $this->saveWorkshopAddons($filteredMods);
+                        $this->loadInstalledMods();
+                        
+                        Notification::make()
+                            ->success()
+                            ->title(count($modIds) > 1 ? count($modIds) . ' Mods Removed' : 'Mod Removed')
+                            ->body(count($modIds) > 1 ? 'Selected mods have been successfully uninstalled' : 'Selected mod has been successfully uninstalled')
+                            ->send();
+                    }),
+            ])
+            ->emptyStateHeading('No mods installed')
+            ->emptyStateDescription('No mods are currently installed. Browse available mods to add them.')
+            ->paginated(false)
+            ->modifyQueryUsing(function ($query) {
+                // This is where we convert our array into a collection of ArrayMod models
+                $modelsCollection = collect($this->installedMods)
+                    ->map(function ($mod, $index) {
+                        $arrayMod = new ArrayMod();
+                        $arrayMod->id = $mod['id'] ?? $index;
+                        $arrayMod->name = $mod['name'] ?? 'Unknown Mod';
+                        $arrayMod->author = $mod['author'] ?? 'Unknown Author';
+                        $arrayMod->version = $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest';
+                        return $arrayMod;
+                    });
+                
+                // Make ArrayMod::query() return our collection
+                ArrayMod::resolveConnection()->setQueryGrammar(new class extends \Illuminate\Database\Query\Grammars\Grammar {
+                    public function compileSelect(\Illuminate\Database\Query\Builder $query)
+                    {
+                        return '';
+                    }
+                });
+                
+                // Return the query with our custom collection
+                return $query->setCollection($modelsCollection);
+            });
+    }
+
+    /**
+     * Process data updates from Livewire
+     */
+    protected function afterUpdated($name, $value): void
+    {
+        // If the installed mods changed, make sure the table data is fresh
+        if ($name === 'installedMods') {
+            $this->resetTable();
+        }
+    }
+
+    protected function getTableRecordKey($record): string
+    {
+        return $record->id;
+    }
+    
+    public function getTableRecordTitle($record): string
+    {
+        return $record->name;
     }
 } 
