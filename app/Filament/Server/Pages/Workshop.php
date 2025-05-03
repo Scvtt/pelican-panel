@@ -522,27 +522,23 @@ class Workshop extends Page implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn () => ArrayMod::query())
             ->columns([
-                TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('author')
-                    ->searchable(),
-                TextColumn::make('version')
-                    ->searchable(),
+                TextColumn::make('name'),
+                TextColumn::make('author'),
+                TextColumn::make('version'),
             ])
             ->actions([
                 Action::make('version')
                     ->label('Version')
                     ->color('gray')
                     ->icon('tabler-versions')
-                    ->action(fn ($record) => $this->showVersionSelect($record['id'])),
+                    ->action(fn ($record) => $this->showVersionSelect($record->id)),
                 Action::make('uninstall')
                     ->label('Remove')
                     ->color('danger')
                     ->icon('tabler-trash')
                     ->requiresConfirmation()
-                    ->action(fn ($record) => $this->uninstallMod($record['id'])),
+                    ->action(fn ($record) => $this->uninstallMod($record->id)),
             ])
             ->bulkActions([
                 BulkAction::make('remove')
@@ -581,29 +577,22 @@ class Workshop extends Page implements HasForms, HasTable
             ])
             ->emptyStateHeading('No mods installed')
             ->emptyStateDescription('No mods are currently installed. Browse available mods to add them.')
-            ->paginated(false)
-            ->modifyQueryUsing(function ($query) {
-                // This is where we convert our array into a collection of ArrayMod models
-                $modelsCollection = collect($this->installedMods)
-                    ->map(function ($mod, $index) {
-                        $arrayMod = new ArrayMod();
-                        $arrayMod->id = $mod['id'] ?? $index;
-                        $arrayMod->name = $mod['name'] ?? 'Unknown Mod';
-                        $arrayMod->author = $mod['author'] ?? 'Unknown Author';
-                        $arrayMod->version = $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest';
-                        return $arrayMod;
-                    });
-                
-                // Make ArrayMod::query() return our collection
-                ArrayMod::resolveConnection()->setQueryGrammar(new class extends \Illuminate\Database\Query\Grammars\Grammar {
-                    public function compileSelect(\Illuminate\Database\Query\Builder $query)
-                    {
-                        return '';
-                    }
-                });
-                
-                // Return the query with our custom collection
-                return $query->setCollection($modelsCollection);
+            ->paginated(false);
+    }
+    
+    /**
+     * Get records for the table
+     */
+    public function getTableRecords(): Collection
+    {
+        return collect($this->installedMods)
+            ->map(function ($mod, $index) {
+                $arrayMod = new ArrayMod();
+                $arrayMod->id = $mod['id'] ?? $index;
+                $arrayMod->name = $mod['name'] ?? 'Unknown Mod';
+                $arrayMod->author = $mod['author'] ?? 'Unknown Author';
+                $arrayMod->version = $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest';
+                return $arrayMod;
             });
     }
 
