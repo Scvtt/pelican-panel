@@ -12,18 +12,78 @@ class ArrayMod extends Model
     public $timestamps = false;
     protected $guarded = [];
 
-    // Prevent saving, deleting, etc.
-    public function save(array $options = []) { return false; }
-    public function delete() { return false; }
-    
     /**
-     * Helper method for setCollection
+     * The attributes that should be cast.
+     *
+     * @var array
      */
-    public static function collection(Collection $collection)
+    protected $casts = [
+        'id' => 'string',
+    ];
+
+    /**
+     * Prevent saving to database
+     */
+    public function save(array $options = [])
     {
-        return new Collection($collection->all());
+        throw new \Exception('ArrayMod cannot be saved to database');
     }
-    
+
+    /**
+     * Prevent deleting from database
+     */
+    public function delete()
+    {
+        throw new \Exception('ArrayMod cannot be deleted from database');
+    }
+
+    /**
+     * Create a new Eloquent Collection instance.
+     *
+     * @param  array  $models
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function collection(array $models = [])
+    {
+        return new Collection($models);
+    }
+
+    /**
+     * Create a new model instance from an array
+     *
+     * @param array $attributes
+     * @return static
+     */
+    public static function fromArray(array $attributes)
+    {
+        $model = new static($attributes);
+        $model->exists = true;
+        return $model;
+    }
+
+    /**
+     * Create a collection of models from an array of arrays
+     *
+     * @param array $items
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function hydrate(array $items)
+    {
+        $models = [];
+        
+        foreach ($items as $item) {
+            // Make sure required fields always exist
+            $item['id'] = $item['id'] ?? uniqid();
+            $item['name'] = $item['name'] ?? 'Unknown';
+            $item['author'] = $item['author'] ?? 'Unknown';
+            $item['version'] = $item['version'] ?? 'Unknown';
+            
+            $models[] = static::fromArray($item);
+        }
+        
+        return static::collection($models);
+    }
+
     /**
      * Allow setting a collection on the builder
      */

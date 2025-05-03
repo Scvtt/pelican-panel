@@ -29,6 +29,13 @@ use Filament\Support\Exceptions\Halt;
 use App\Models\Variable;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use App\Models\ArrayMod;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\View\View;
+use Filament\Actions\Action as PageAction;
 
 class Workshop extends Page implements HasForms, HasTable
 {
@@ -297,6 +304,7 @@ class Workshop extends Page implements HasForms, HasTable
     
     public function uninstallMod(string $modId): void
     {
+        // Get existing mods
         $workshopVariable = $this->getWorkshopAddonsVariable();
         if (!$workshopVariable) {
             return;
@@ -310,8 +318,15 @@ class Workshop extends Page implements HasForms, HasTable
             return $mod['id'] !== $modId;
         });
         
+        // Save the filtered list
         $this->saveWorkshopAddons($filteredMods);
         $this->loadInstalledMods();
+        
+        Notification::make()
+            ->success()
+            ->title('Mod Removed')
+            ->body('Selected mod has been successfully uninstalled')
+            ->send();
     }
     
     public function showVersionSelect(string $modId): void
@@ -518,25 +533,31 @@ class Workshop extends Page implements HasForms, HasTable
         $this->dispatch('close-modal', id: 'confirm-bulk-uninstall');
     }
     
+    /**
+     * Get table records
+     */
+    public function getTableRecords()
+    {
+        $mods = ArrayMod::hydrate($this->installedMods);
+        return $mods;
+    }
+
+    /**
+     * Get a unique record key for a table record.
+     * 
+     * @param \Illuminate\Database\Eloquent\Model $record
+     * @return string
+     */
+    public function getTableRecordKey(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        // For ArrayMod instances, simply return the id
+        return (string)$record->id;
+    }
+
     public function table(Table $table): Table
     {
         return $table
-            ->query(function () {
-                return collect($this->installedMods)
-                    ->map(function ($mod, $index) {
-                        // Add an index as fallback key if id is missing
-                        if (!isset($mod['id'])) {
-                            $mod['id'] = (string)$index;
-                        }
-                        
-                        // Ensure required fields exist
-                        $mod['name'] = $mod['name'] ?? 'Unknown Mod';
-                        $mod['author'] = $mod['author'] ?? 'Unknown Author';
-                        $mod['version'] = $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest';
-                        
-                        return $mod;
-                    });
-            })
+            ->query(fn () => ArrayMod::hydrate($this->installedMods))
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('author'),
@@ -547,13 +568,13 @@ class Workshop extends Page implements HasForms, HasTable
                     ->label('Version')
                     ->color('gray')
                     ->icon('tabler-versions')
-                    ->action(fn ($record) => $this->showVersionSelect($record['id'])),
+                    ->action(fn ($record) => $this->showVersionSelect($record->id)),
                 Action::make('uninstall')
                     ->label('Remove')
                     ->color('danger')
                     ->icon('tabler-trash')
                     ->requiresConfirmation()
-                    ->action(fn ($record) => $this->uninstallMod($record['id'])),
+                    ->action(fn ($record) => $this->uninstallMod($record->id)),
             ])
             ->bulkActions([
                 BulkAction::make('remove')
@@ -563,7 +584,7 @@ class Workshop extends Page implements HasForms, HasTable
                     ->requiresConfirmation()
                     ->action(function (Collection $records): void {
                         // Get all selected mod IDs
-                        $modIds = $records->map(fn ($record) => $record['id'])->all();
+                        $modIds = $records->map(fn ($record) => $record->id)->all();
                         
                         // Get existing mods
                         $workshopVariable = $this->getWorkshopAddonsVariable();
@@ -605,29 +626,4 @@ class Workshop extends Page implements HasForms, HasTable
             $this->resetTable();
         }
     }
-
-    /**
-     * Get a unique record key for a table record.
-     * 
-     * @param \Illuminate\Database\Eloquent\Model $record
-     * @return string
-     */
-    public function getTableRecordKey(\Illuminate\Database\Eloquent\Model $record): string
-    {
-        // In Filament v3, with our table data being array-based but passed as
-        // a stdClass when filtered through the table builder,
-        // we need to check and convert the record to an array
-        if (is_object($record) && method_exists($record, 'toArray')) {
-            $data = $record->toArray();
-        } elseif (is_object($record)) {
-            // If it's a stdClass or similar, convert to array
-            $data = (array)$record;
-        } else {
-            $data = $record;
-        }
-        
-        // Get the ID if it exists, or generate a unique ID
-        return (string)($data['id'] ?? uniqid());
-    }
-
 } 
