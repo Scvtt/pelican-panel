@@ -526,6 +526,7 @@ class Workshop extends Page implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
+            ->query(fn () => collect($this->installedMods))
             ->columns([
                 TextColumn::make('name')
                     ->label('Name')
@@ -564,30 +565,20 @@ class Workshop extends Page implements HasForms, HasTable
                     ->action(function (Collection $records) {
                         // Get IDs of selected mods
                         $modIds = $records->pluck('id')->toArray();
-                        
                         if (empty($modIds)) {
                             return;
                         }
-                        
-                        // Process the uninstallation
                         $workshopVariable = $this->getWorkshopAddonsVariable();
                         if (!$workshopVariable) {
                             return;
                         }
-                        
                         $modService = app(ReforgerModService::class);
                         $existingMods = $modService->parseWorkshopAddons($workshopVariable->variable_value);
-                        
-                        // Filter out the mods to uninstall
                         $filteredMods = array_filter($existingMods, function ($mod) use ($modIds) {
                             return !in_array($mod['id'], $modIds);
                         });
-                        
-                        // Save the filtered list
                         $this->saveWorkshopAddons($filteredMods);
                         $this->loadInstalledMods();
-                        
-                        // Show success notification
                         $count = count($modIds);
                         Notification::make()
                             ->success()
