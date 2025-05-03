@@ -632,11 +632,7 @@ class Workshop extends Page implements HasForms, HasTable
                     ->sortable(),
             ])
             ->headerActions([
-                \Filament\Tables\Actions\Action::make('refresh')
-                    ->label('Refresh')
-                    ->color('gray')
-                    ->icon('tabler-refresh')
-                    ->action(fn () => $this->loadInstalledMods()),
+                // Moving the refresh action to be in the global search toolbar instead
             ])
             ->actions([
                 Action::make('version')
@@ -690,18 +686,29 @@ class Workshop extends Page implements HasForms, HasTable
             ->emptyStateDescription('No mods are currently installed. Browse available mods to add them.')
             ->defaultSort('name')
             ->filters([
-                SelectFilter::make('author')
+                \Filament\Tables\Filters\SelectFilter::make('author')
+                    ->label('Author')
                     ->options(function() {
                         return ArMod::where('server_id', Filament::getTenant()->id)
-                            ->distinct('author')
+                            ->where('is_installed', true)
+                            ->distinct()
                             ->pluck('author', 'author')
                             ->toArray();
-                    }),
+                    })
             ])
+            ->filtersFormColumns(3)
             ->searchable(true, ['name', 'author'])
+            ->searchInputDebounce(500)
             ->paginated(false)
             ->contentGrid([
                 'md' => 1,
+            ])
+            ->extraHeaderActions([
+                \Filament\Tables\Actions\Action::make('refresh')
+                    ->label('Refresh')
+                    ->color('gray')
+                    ->icon('tabler-refresh')
+                    ->action(fn () => $this->loadInstalledMods()),
             ]);
     }
     
