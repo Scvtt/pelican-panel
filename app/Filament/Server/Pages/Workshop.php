@@ -14,10 +14,18 @@ use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 use Filament\Resources\Components\Tab;
 use Filament\Notifications\Notification;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\DB;
 
-class Workshop extends Page implements HasForms
+class Workshop extends Page implements HasForms, HasTable
 {
     use InteractsWithForms;
+    use InteractsWithTable;
 
     protected static ?string $navigationIcon = 'tabler-cube';
     
@@ -500,5 +508,94 @@ class Workshop extends Page implements HasForms
             
         // Close the modal
         $this->dispatch('close-modal', id: 'confirm-bulk-uninstall');
+    }
+    
+    /**
+     * Get data for the table
+     */
+    protected function getTableRecords(): array|\Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection
+    {
+        return collect($this->installedMods);
+    }
+    
+    /**
+     * Configure the table for installed mods
+     */
+    public function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->getStateUsing(fn ($record) => $record['name'] ?? 'Unknown Mod')
+                    ->searchable(),
+                TextColumn::make('author')
+                    ->label('Author')
+                    ->getStateUsing(fn ($record) => $record['author'] ?? 'Unknown Author')
+                    ->searchable(),
+                TextColumn::make('version')
+                    ->label('Version')
+                    ->getStateUsing(fn ($record) => $record['version'] ?? $record['currentVersionNumber'] ?? 'Latest'),
+            ])
+            ->actions([
+                Action::make('version')
+                    ->label('Version')
+                    ->icon('tabler-versions')
+                    ->button()
+                    ->color('gray')
+                    ->action(fn ($record) => $this->showVersionSelect($record['id'])),
+                Action::make('uninstall')
+                    ->label('Remove')
+                    ->icon('tabler-trash')
+                    ->button()
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $this->uninstallMod($record['id'])),
+            ])
+            ->bulkActions([
+                BulkAction::make('remove')
+                    ->label('Remove Selected')
+                    ->icon('tabler-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (Collection $records) {
+                        // Get IDs of selected mods
+                        $modIds = $records->pluck('id')->toArray();
+                        
+                        if (empty($modIds)) {
+                            return;
+                        }
+                        
+                        // Process the uninstallation
+                        $workshopVariable = $this->getWorkshopAddonsVariable();
+                        if (!$workshopVariable) {
+                            return;
+                        }
+                        
+                        $modService = app(ReforgerModService::class);
+                        $existingMods = $modService->parseWorkshopAddons($workshopVariable->variable_value);
+                        
+                        // Filter out the mods to uninstall
+                        $filteredMods = array_filter($existingMods, function ($mod) use ($modIds) {
+                            return !in_array($mod['id'], $modIds);
+                        });
+                        
+                        // Save the filtered list
+                        $this->saveWorkshopAddons($filteredMods);
+                        $this->loadInstalledMods();
+                        
+                        // Show success notification
+                        $count = count($modIds);
+                        Notification::make()
+                            ->success()
+                            ->title($count > 1 ? "$count Mods Removed" : "Mod Removed")
+                            ->body($count > 1 ? "Selected mods have been successfully uninstalled" : "Selected mod has been successfully uninstalled")
+                            ->send();
+                    }),
+            ])
+            ->emptyStateHeading('No mods installed')
+            ->emptyStateDescription('Browse available mods to add them to your server.')
+            ->paginated(false);
     }
 } 
