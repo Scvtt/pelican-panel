@@ -29,7 +29,6 @@ use Filament\Support\Exceptions\Halt;
 use App\Models\Variable;
 use Illuminate\Support\Str;
 use Livewire\Component;
-use App\Models\ArrayMod;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -538,26 +537,27 @@ class Workshop extends Page implements HasForms, HasTable
      */
     public function getTableRecords()
     {
-        $mods = ArrayMod::hydrate($this->installedMods);
-        return $mods;
+        return collect($this->installedMods);
     }
 
     /**
      * Get a unique record key for a table record.
      * 
-     * @param \Illuminate\Database\Eloquent\Model $record
+     * @param mixed $record
      * @return string
      */
-    public function getTableRecordKey(\Illuminate\Database\Eloquent\Model $record): string
+    public function getTableRecordKey($record): string
     {
-        // For ArrayMod instances, simply return the id
-        return (string)$record->id;
+        // Extract ID from array record
+        return (string)($record['id'] ?? uniqid());
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn () => ArrayMod::hydrate($this->installedMods))
+            ->query(function () {
+                return $this->getTableRecords();
+            })
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('author'),
@@ -568,13 +568,13 @@ class Workshop extends Page implements HasForms, HasTable
                     ->label('Version')
                     ->color('gray')
                     ->icon('tabler-versions')
-                    ->action(fn ($record) => $this->showVersionSelect($record->id)),
+                    ->action(fn ($record) => $this->showVersionSelect($record['id'])),
                 Action::make('uninstall')
                     ->label('Remove')
                     ->color('danger')
                     ->icon('tabler-trash')
                     ->requiresConfirmation()
-                    ->action(fn ($record) => $this->uninstallMod($record->id)),
+                    ->action(fn ($record) => $this->uninstallMod($record['id'])),
             ])
             ->bulkActions([
                 BulkAction::make('remove')
@@ -584,7 +584,7 @@ class Workshop extends Page implements HasForms, HasTable
                     ->requiresConfirmation()
                     ->action(function (Collection $records): void {
                         // Get all selected mod IDs
-                        $modIds = $records->map(fn ($record) => $record->id)->all();
+                        $modIds = $records->map(fn ($record) => $record['id'])->all();
                         
                         // Get existing mods
                         $workshopVariable = $this->getWorkshopAddonsVariable();
