@@ -583,43 +583,53 @@ class Workshop extends Page implements HasForms, HasTable
 
     /**
      * Get table records
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Contracts\Pagination\Paginator|\Illuminate\Contracts\Pagination\CursorPaginator
      */
-    public function getTableRecords()
+    public function getTableRecords(): \Illuminate\Database\Eloquent\Collection|\Illuminate\Contracts\Pagination\Paginator|\Illuminate\Contracts\Pagination\CursorPaginator
     {
-        // Get records from the database for the current server
         /** @var Server $server */
         $server = Filament::getTenant();
         
         return ArMod::where('server_id', $server->id)
             ->where('is_installed', true)
+            ->latest()
             ->get();
     }
 
     /**
      * Get a unique record key for a table record.
      * 
-     * @param mixed $record
+     * @param \Illuminate\Database\Eloquent\Model $record
      * @return string
      */
-    public function getTableRecordKey($record): string
+    public function getTableRecordKey(\Illuminate\Database\Eloquent\Model $record): string
     {
         // For ArMod models, return the UUID
         if ($record instanceof ArMod) {
             return $record->uuid;
         }
         
-        // For arrays, return the ID
-        return (string)($record['id'] ?? $record['uuid'] ?? uniqid());
+        // Fallback for any other type of model
+        return (string)($record->getKey() ?? uniqid());
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn () => $this->getTableRecords())
+            ->query(ArMod::query()->where('server_id', Filament::getTenant()->id)->where('is_installed', true))
             ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('author'),
-                TextColumn::make('version'),
+                TextColumn::make('name')
+                    ->label('Mod Name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('author')
+                    ->label('Author')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('version')
+                    ->label('Version')
+                    ->sortable(),
             ])
             ->actions([
                 Action::make('version')
@@ -671,6 +681,17 @@ class Workshop extends Page implements HasForms, HasTable
             ])
             ->emptyStateHeading('No mods installed')
             ->emptyStateDescription('No mods are currently installed. Browse available mods to add them.')
+            ->defaultSort('name')
+            ->filters([
+                SelectFilter::make('author')
+                    ->options(function() {
+                        return ArMod::where('server_id', Filament::getTenant()->id)
+                            ->distinct('author')
+                            ->pluck('author', 'author')
+                            ->toArray();
+                    }),
+            ])
+            ->searchable(['name', 'author'])
             ->paginated(false);
     }
     
