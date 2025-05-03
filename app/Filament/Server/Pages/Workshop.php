@@ -21,6 +21,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\DB;
+use App\Models\ArrayMod;
 
 class Workshop extends Page implements HasForms, HasTable
 {
@@ -526,7 +527,7 @@ class Workshop extends Page implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn () => collect($this->installedMods))
+            ->query(fn () => collect($this->installedMods)->map(fn ($mod) => new ArrayMod($mod)))
             ->columns([
                 TextColumn::make('name')
                     ->label('Name')
