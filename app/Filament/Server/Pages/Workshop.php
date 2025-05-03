@@ -513,8 +513,10 @@ class Workshop extends Page implements HasForms, HasTable
     /**
      * Get data for the table
      */
-    public function getTableRecords()
+    public function getTableQuery()
     {
+        // Create a queryable collection from installedMods
+        // Use \Illuminate\Database\Eloquent\Collection if possible, otherwise use \Illuminate\Support\Collection
         return collect($this->installedMods);
     }
     
