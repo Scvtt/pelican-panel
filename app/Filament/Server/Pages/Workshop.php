@@ -618,7 +618,7 @@ class Workshop extends Page implements HasForms, HasTable
         }
     }
 
-    protected function getTableRecordKey($record): string
+    public function getTableRecordKey($record): string
     {
         return $record->id;
     }
