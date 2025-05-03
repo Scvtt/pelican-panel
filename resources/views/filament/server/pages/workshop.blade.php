@@ -128,8 +128,8 @@
                                                     <input 
                                                         type="checkbox" 
                                                         class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-700"
-                                                        x-on:click="toggleSelection('{{ $index }}')"
-                                                        x-bind:checked="isSelected('{{ $index }}')"
+                                                        x-on:click="toggleSelection('{{ $mod['id'] }}')"
+                                                        x-bind:checked="isSelected('{{ $mod['id'] }}')"
                                                     />
                                                 </div>
                                             </td>
