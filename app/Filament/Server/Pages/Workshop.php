@@ -527,7 +527,7 @@ class Workshop extends Page implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn () => collect($this->installedMods)->map(fn ($mod) => new ArrayMod($mod)))
+            ->query(fn () => ArrayMod::hydrate($this->installedMods))
             ->columns([
                 TextColumn::make('name')
                     ->label('Name')
