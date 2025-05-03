@@ -22,14 +22,40 @@
                 <!-- Installed Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
                     @if (count($installedMods) > 0)
-                        <div class="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700" x-data="{ selectedMods: [], allSelected: false }">
+                        <div class="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700" x-data="{ 
+                            get selectedModIds() { 
+                                return $wire.selectedModIds || [];
+                            },
+                            set selectedModIds(value) {
+                                $wire.selectedModIds = value;
+                            },
+                            get selectedCount() {
+                                return this.selectedModIds.length;
+                            },
+                            selectAll() {
+                                this.selectedModIds = @js(collect($installedMods)->pluck('id')->toArray());
+                            },
+                            deselectAll() {
+                                this.selectedModIds = [];
+                            },
+                            isSelected(id) {
+                                return this.selectedModIds.includes(id);
+                            },
+                            toggleSelection(id) {
+                                if (this.isSelected(id)) {
+                                    this.selectedModIds = this.selectedModIds.filter(item => item !== id);
+                                } else {
+                                    this.selectedModIds = [...this.selectedModIds, id];
+                                }
+                            }
+                        }">
                             <div class="filament-tables-header-container p-2 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
-                                <div class="px-3 py-2 flex items-center gap-x-3" x-show="selectedMods.length > 0" x-cloak>
-                                    <span class="text-sm text-gray-600 dark:text-gray-400" x-text="`${selectedMods.length} record${selectedMods.length === 1 ? '' : 's'} selected`"></span>
+                                <div class="px-3 py-2 flex items-center gap-x-3" x-show="selectedCount > 0" x-cloak>
+                                    <span class="text-sm text-gray-600 dark:text-gray-400" x-text="`${selectedCount} record${selectedCount === 1 ? '' : 's'} selected`"></span>
                                     
                                     <button
                                         type="button"
-                                        x-on:click="selectedMods = []; allSelected = false"
+                                        x-on:click="deselectAll"
                                         class="text-sm text-danger-600 hover:text-danger-500"
                                     >
                                         Deselect all
@@ -51,7 +77,7 @@
                                                     icon="tabler-trash"
                                                     color="danger"
                                                 >
-                                                    Remove All Selected
+                                                    Remove Selected
                                                 </x-filament::dropdown.list.item>
                                             </x-filament::dropdown.list>
                                         </x-filament::dropdown>
@@ -67,8 +93,8 @@
                                                 <input 
                                                     type="checkbox" 
                                                     class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-700"
-                                                    x-on:click="allSelected = !allSelected; selectedMods = allSelected ? [...Array({{ count($installedMods) }}).keys()].map(i => i.toString()) : []"
-                                                    x-bind:checked="allSelected"
+                                                    x-on:click="selectedCount === @js(count($installedMods)) ? deselectAll() : selectAll()"
+                                                    x-bind:checked="selectedCount === @js(count($installedMods)) && @js(count($installedMods)) > 0"
                                                 />
                                             </div>
                                         </th>
@@ -102,16 +128,8 @@
                                                     <input 
                                                         type="checkbox" 
                                                         class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-700"
-                                                        x-on:click="
-                                                            const i = selectedMods.indexOf('{{ $index }}');
-                                                            if (i === -1) {
-                                                                selectedMods.push('{{ $index }}');
-                                                            } else {
-                                                                selectedMods.splice(i, 1);
-                                                            }
-                                                            allSelected = selectedMods.length === {{ count($installedMods) }};
-                                                        "
-                                                        x-bind:checked="selectedMods.includes('{{ $index }}')"
+                                                        x-on:click="toggleSelection('{{ $index }}')"
+                                                        x-bind:checked="isSelected('{{ $index }}')"
                                                     />
                                                 </div>
                                             </td>
