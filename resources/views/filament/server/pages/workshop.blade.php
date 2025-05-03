@@ -22,56 +22,82 @@
                 <!-- Installed Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
                     @if (count($installedMods) > 0)
-                        <div class="overflow-x-auto">
-                            <table class="w-full border-collapse filament-tables-table">
+                        <div class="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
+                            <div class="filament-tables-header-container p-2 bg-gray-50 dark:bg-gray-800">
+                                <div class="px-3 py-2 flex items-center gap-x-3">
+                                    <div class="filament-tables-bulk-actions-trigger">
+                                        <x-filament::dropdown placement="bottom-start">
+                                            <x-slot name="trigger">
+                                                <x-filament::button
+                                                    type="button"
+                                                    color="gray"
+                                                    size="sm"
+                                                    class="flex items-center gap-1"
+                                                >
+                                                    Bulk Actions
+                                                    <x-tabler-chevron-down class="w-4 h-4 ml-1" />
+                                                </x-filament::button>
+                                            </x-slot>
+                                            
+                                            <x-filament::dropdown.list>
+                                                <x-filament::dropdown.list.item
+                                                    wire:click="bulkUninstallConfirm"
+                                                    icon="tabler-trash"
+                                                    color="danger"
+                                                >
+                                                    Remove All Mods
+                                                </x-filament::dropdown.list.item>
+                                            </x-filament::dropdown.list>
+                                        </x-filament::dropdown>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <table class="w-full text-left rtl:text-right divide-y table-auto dark:divide-gray-700">
                                 <thead>
-                                    <tr class="bg-gray-50 dark:bg-gray-700">
-                                        <th colspan="4" class="p-2">
-                                            @if(count($installedMods) > 0)
-                                                <div class="px-3 py-2">
-                                                    <x-filament::button
-                                                        type="button" 
-                                                        wire:click="bulkUninstallConfirm"
-                                                        color="danger"
-                                                        size="sm"
-                                                        icon="tabler-trash"
-                                                        class="mr-2"
-                                                    >
-                                                        Remove All
-                                                    </x-filament::button>
-                                                </div>
-                                            @endif
-                                        </th>
-                                    </tr>
                                     <tr class="border-b border-gray-200 dark:border-gray-700">
-                                        <th class="p-2 text-left text-sm font-medium text-gray-900 dark:text-white">
-                                            Name
+                                        <th class="p-0">
+                                            <div class="flex items-center w-full px-4 py-3">
+                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Name</span>
+                                            </div>
                                         </th>
-                                        <th class="p-2 text-left text-sm font-medium text-gray-900 dark:text-white">
-                                            Author
+                                        <th class="p-0">
+                                            <div class="flex items-center w-full px-4 py-3">
+                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Author</span>
+                                            </div>
                                         </th>
-                                        <th class="p-2 text-left text-sm font-medium text-gray-900 dark:text-white">
-                                            Version
+                                        <th class="p-0">
+                                            <div class="flex items-center w-full px-4 py-3">
+                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Version</span>
+                                            </div>
                                         </th>
-                                        <th class="p-2 text-left text-sm font-medium text-gray-900 dark:text-white">
-                                            Actions
+                                        <th class="p-0">
+                                            <div class="flex items-center w-full px-4 py-3">
+                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Actions</span>
+                                            </div>
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class="divide-y dark:divide-gray-700">
                                     @foreach ($installedMods as $mod)
-                                        <tr class="border-b border-gray-200 dark:border-gray-700" wire:key="mod-{{ $mod['id'] }}">
-                                            <td class="p-2 text-sm text-gray-700 dark:text-gray-300">
-                                                {{ $mod['name'] ?? 'Unknown Mod' }}
+                                        <tr class="filament-tables-row" wire:key="mod-{{ $mod['id'] }}">
+                                            <td class="p-0">
+                                                <div class="px-4 py-3 flex items-center gap-2">
+                                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ $mod['name'] ?? 'Unknown Mod' }}</span>
+                                                </div>
                                             </td>
-                                            <td class="p-2 text-sm text-gray-700 dark:text-gray-300">
-                                                {{ $mod['author'] ?? 'Unknown Author' }}
+                                            <td class="p-0">
+                                                <div class="px-4 py-3">
+                                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ $mod['author'] ?? 'Unknown Author' }}</span>
+                                                </div>
                                             </td>
-                                            <td class="p-2 text-sm text-gray-700 dark:text-gray-300">
-                                                {{ $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest' }}
+                                            <td class="p-0">
+                                                <div class="px-4 py-3">
+                                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest' }}</span>
+                                                </div>
                                             </td>
-                                            <td class="p-2 text-sm">
-                                                <div class="flex space-x-2">
+                                            <td class="p-0">
+                                                <div class="px-4 py-3 flex items-center gap-1">
                                                     <x-filament::button
                                                         type="button"
                                                         wire:click="showVersionSelect('{{ $mod['id'] }}')"
