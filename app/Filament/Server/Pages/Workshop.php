@@ -606,13 +606,4 @@ class Workshop extends Page implements HasForms, HasTable
         }
     }
 
-    public function getTableRecordKey($record)
-    {
-        return $record['id'];
-    }
-    
-    public function getTableRecordTitle($record): string
-    {
-        return $record['name'];
-    }
 } 
