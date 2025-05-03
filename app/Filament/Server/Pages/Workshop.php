@@ -703,7 +703,7 @@ class Workshop extends Page implements HasForms, HasTable
             ->contentGrid([
                 'md' => 1,
             ])
-            ->extraHeaderActions([
+            ->headerActions([
                 \Filament\Tables\Actions\Action::make('refresh')
                     ->label('Refresh')
                     ->color('gray')
