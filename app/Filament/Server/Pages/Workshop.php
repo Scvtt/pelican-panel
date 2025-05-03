@@ -698,7 +698,7 @@ class Workshop extends Page implements HasForms, HasTable
             ])
             ->filtersFormColumns(3)
             ->searchable(true, ['name', 'author'])
-            ->searchInputDebounce(500)
+            ->searchDebounce(500)
             ->paginated(false)
             ->contentGrid([
                 'md' => 1,
