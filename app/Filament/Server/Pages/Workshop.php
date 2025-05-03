@@ -514,7 +514,7 @@ class Workshop extends Page implements HasForms, HasTable
     /**
      * Get records for the table
      */
-    public function getTableRecords()
+    public function getTableRecords(): array|\Illuminate\Database\Eloquent\Collection|\Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection
     {
         return ArrayMod::hydrate($this->installedMods);
     }
