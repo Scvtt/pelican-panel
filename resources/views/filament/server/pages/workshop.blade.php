@@ -22,78 +22,82 @@
                 <!-- Installed Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
                     @if (count($installedMods) > 0)
-                        <x-filament::table>
-                            <x-slot name="header">
-                                <x-filament::table.header-cell>
-                                    @if(count($installedMods) > 0)
-                                        <div class="px-3 py-4">
-                                            <x-filament::button
-                                                type="button" 
-                                                wire:click="bulkUninstallConfirm"
-                                                color="danger"
-                                                size="sm"
-                                                icon="tabler-trash"
-                                                class="mr-2"
-                                            >
-                                                Remove All
-                                            </x-filament::button>
-                                        </div>
-                                    @endif
-                                </x-filament::table.header-cell>
-                            </x-slot>
-                            
-                            <x-slot name="headers">
-                                <x-filament::table.header-cell>
-                                    Name
-                                </x-filament::table.header-cell>
-                                <x-filament::table.header-cell>
-                                    Author
-                                </x-filament::table.header-cell>
-                                <x-filament::table.header-cell>
-                                    Version
-                                </x-filament::table.header-cell>
-                                <x-filament::table.header-cell>
-                                    Actions
-                                </x-filament::table.header-cell>
-                            </x-slot>
-                            
-                            @foreach ($installedMods as $mod)
-                                <x-filament::table.row wire:key="mod-{{ $mod['id'] }}">
-                                    <x-filament::table.cell>
-                                        {{ $mod['name'] ?? 'Unknown Mod' }}
-                                    </x-filament::table.cell>
-                                    <x-filament::table.cell>
-                                        {{ $mod['author'] ?? 'Unknown Author' }}
-                                    </x-filament::table.cell>
-                                    <x-filament::table.cell>
-                                        {{ $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest' }}
-                                    </x-filament::table.cell>
-                                    <x-filament::table.cell>
-                                        <div class="flex space-x-2">
-                                            <x-filament::button
-                                                type="button"
-                                                wire:click="showVersionSelect('{{ $mod['id'] }}')"
-                                                color="gray"
-                                                size="sm"
-                                                icon="tabler-versions"
-                                            >
-                                                Version
-                                            </x-filament::button>
-                                            
-                                            <x-filament::button
-                                                type="button" 
-                                                wire:click="uninstallMod('{{ $mod['id'] }}')"
-                                                color="danger"
-                                                size="sm"
-                                                icon="tabler-trash"
-                                            >
-                                                Remove
-                                            </x-filament::button>
-                                        </div>
-                                    </x-filament::table.cell>
-                                </x-filament::table.row>
-                            @endforeach
-                        </x-filament::table>
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse filament-tables-table">
+                                <thead>
+                                    <tr class="bg-gray-50 dark:bg-gray-700">
+                                        <th colspan="4" class="p-2">
+                                            @if(count($installedMods) > 0)
+                                                <div class="px-3 py-2">
+                                                    <x-filament::button
+                                                        type="button" 
+                                                        wire:click="bulkUninstallConfirm"
+                                                        color="danger"
+                                                        size="sm"
+                                                        icon="tabler-trash"
+                                                        class="mr-2"
+                                                    >
+                                                        Remove All
+                                                    </x-filament::button>
+                                                </div>
+                                            @endif
+                                        </th>
+                                    </tr>
+                                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                                        <th class="p-2 text-left text-sm font-medium text-gray-900 dark:text-white">
+                                            Name
+                                        </th>
+                                        <th class="p-2 text-left text-sm font-medium text-gray-900 dark:text-white">
+                                            Author
+                                        </th>
+                                        <th class="p-2 text-left text-sm font-medium text-gray-900 dark:text-white">
+                                            Version
+                                        </th>
+                                        <th class="p-2 text-left text-sm font-medium text-gray-900 dark:text-white">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($installedMods as $mod)
+                                        <tr class="border-b border-gray-200 dark:border-gray-700" wire:key="mod-{{ $mod['id'] }}">
+                                            <td class="p-2 text-sm text-gray-700 dark:text-gray-300">
+                                                {{ $mod['name'] ?? 'Unknown Mod' }}
+                                            </td>
+                                            <td class="p-2 text-sm text-gray-700 dark:text-gray-300">
+                                                {{ $mod['author'] ?? 'Unknown Author' }}
+                                            </td>
+                                            <td class="p-2 text-sm text-gray-700 dark:text-gray-300">
+                                                {{ $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest' }}
+                                            </td>
+                                            <td class="p-2 text-sm">
+                                                <div class="flex space-x-2">
+                                                    <x-filament::button
+                                                        type="button"
+                                                        wire:click="showVersionSelect('{{ $mod['id'] }}')"
+                                                        color="gray"
+                                                        size="sm"
+                                                        icon="tabler-versions"
+                                                    >
+                                                        Version
+                                                    </x-filament::button>
+                                                    
+                                                    <x-filament::button
+                                                        type="button" 
+                                                        wire:click="uninstallMod('{{ $mod['id'] }}')"
+                                                        color="danger"
+                                                        size="sm"
+                                                        icon="tabler-trash"
+                                                    >
+                                                        Remove
+                                                    </x-filament::button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     @else
                         <div class="py-4 text-center text-gray-500 dark:text-gray-400">
                             No mods are currently installed. Browse available mods below to add them.
