@@ -87,6 +87,11 @@ class Workshop extends Page implements HasForms
      */
     public string $searchTerm = '';
     
+    /**
+     * IDs of selected mods for bulk actions
+     */
+    public array $selectedModIds = [];
+    
     public function mount(): void
     {
         // Check if this server's egg has the AR_WORKSHOP feature flag enabled
@@ -451,25 +456,46 @@ class Workshop extends Page implements HasForms
     
     public function bulkUninstallConfirm(): void
     {
+        if (empty($this->selectedModIds)) {
+            // If no mods are explicitly selected, prepare to remove all
+            $this->selectedModIds = collect($this->installedMods)->pluck('id')->toArray();
+        }
+        
         $this->dispatch('open-modal', id: 'confirm-bulk-uninstall');
     }
     
     public function bulkUninstallMods(): void
     {
+        if (empty($this->selectedModIds)) {
+            return;
+        }
+        
         $workshopVariable = $this->getWorkshopAddonsVariable();
         if (!$workshopVariable) {
             return;
         }
         
-        // Clear all mods by saving an empty array
-        $this->saveWorkshopAddons([]);
+        $modService = app(ReforgerModService::class);
+        $existingMods = $modService->parseWorkshopAddons($workshopVariable->variable_value);
+        
+        // Filter out the mods to uninstall
+        $filteredMods = array_filter($existingMods, function ($mod) {
+            return !in_array($mod['id'], $this->selectedModIds);
+        });
+        
+        // Save the filtered list
+        $this->saveWorkshopAddons($filteredMods);
         $this->loadInstalledMods();
         
+        // Clear selected mods
+        $this->selectedModIds = [];
+        
         // Show success notification
+        $count = count($this->selectedModIds);
         Notification::make()
             ->success()
-            ->title('All Mods Removed')
-            ->body('All mods have been successfully uninstalled')
+            ->title($count > 1 ? "$count Mods Removed" : "Mod Removed")
+            ->body($count > 1 ? "Selected mods have been successfully uninstalled" : "Selected mod has been successfully uninstalled")
             ->send();
             
         // Close the modal

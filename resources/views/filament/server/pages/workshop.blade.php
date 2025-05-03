@@ -22,30 +22,36 @@
                 <!-- Installed Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
                     @if (count($installedMods) > 0)
-                        <div class="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
-                            <div class="filament-tables-header-container p-2 bg-gray-50 dark:bg-gray-800">
-                                <div class="px-3 py-2 flex items-center gap-x-3">
+                        <div class="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700" x-data="{ selectedMods: [], allSelected: false }">
+                            <div class="filament-tables-header-container p-2 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
+                                <div class="px-3 py-2 flex items-center gap-x-3" x-show="selectedMods.length > 0" x-cloak>
+                                    <span class="text-sm text-gray-600 dark:text-gray-400" x-text="`${selectedMods.length} record${selectedMods.length === 1 ? '' : 's'} selected`"></span>
+                                    
+                                    <button
+                                        type="button"
+                                        x-on:click="selectedMods = []; allSelected = false"
+                                        class="text-sm text-danger-600 hover:text-danger-500"
+                                    >
+                                        Deselect all
+                                    </button>
+                                    
                                     <div class="filament-tables-bulk-actions-trigger">
-                                        <x-filament::dropdown placement="bottom-start">
-                                            <x-slot name="trigger">
-                                                <x-filament::button
-                                                    type="button"
-                                                    color="gray"
-                                                    size="sm"
-                                                    class="flex items-center gap-1"
-                                                >
-                                                    Bulk Actions
-                                                    <x-tabler-chevron-down class="w-4 h-4 ml-1" />
-                                                </x-filament::button>
-                                            </x-slot>
-                                            
+                                        <x-filament::icon-button
+                                            icon="tabler-dots-vertical"
+                                            color="gray"
+                                            size="sm"
+                                            label="Bulk actions"
+                                            x-on:click="$dispatch('open-dropdown', { id: 'bulk-actions-dropdown' })"
+                                        />
+                                        
+                                        <x-filament::dropdown id="bulk-actions-dropdown" placement="bottom-start">
                                             <x-filament::dropdown.list>
                                                 <x-filament::dropdown.list.item
                                                     wire:click="bulkUninstallConfirm"
                                                     icon="tabler-trash"
                                                     color="danger"
                                                 >
-                                                    Remove All Mods
+                                                    Remove All Selected
                                                 </x-filament::dropdown.list.item>
                                             </x-filament::dropdown.list>
                                         </x-filament::dropdown>
@@ -56,6 +62,16 @@
                             <table class="w-full text-left rtl:text-right divide-y table-auto dark:divide-gray-700">
                                 <thead>
                                     <tr class="border-b border-gray-200 dark:border-gray-700">
+                                        <th class="p-0 w-12">
+                                            <div class="px-4 py-3">
+                                                <input 
+                                                    type="checkbox" 
+                                                    class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-700"
+                                                    x-on:click="allSelected = !allSelected; selectedMods = allSelected ? [...Array({{ count($installedMods) }}).keys()].map(i => i.toString()) : []"
+                                                    x-bind:checked="allSelected"
+                                                />
+                                            </div>
+                                        </th>
                                         <th class="p-0">
                                             <div class="flex items-center w-full px-4 py-3">
                                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Name</span>
@@ -79,8 +95,26 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y dark:divide-gray-700">
-                                    @foreach ($installedMods as $mod)
+                                    @foreach ($installedMods as $index => $mod)
                                         <tr class="filament-tables-row" wire:key="mod-{{ $mod['id'] }}">
+                                            <td class="p-0 w-12">
+                                                <div class="px-4 py-3">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-700"
+                                                        x-on:click="
+                                                            const i = selectedMods.indexOf('{{ $index }}');
+                                                            if (i === -1) {
+                                                                selectedMods.push('{{ $index }}');
+                                                            } else {
+                                                                selectedMods.splice(i, 1);
+                                                            }
+                                                            allSelected = selectedMods.length === {{ count($installedMods) }};
+                                                        "
+                                                        x-bind:checked="selectedMods.includes('{{ $index }}')"
+                                                    />
+                                                </div>
+                                            </td>
                                             <td class="p-0">
                                                 <div class="px-4 py-3 flex items-center gap-2">
                                                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ $mod['name'] ?? 'Unknown Mod' }}</span>
