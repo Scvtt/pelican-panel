@@ -691,7 +691,7 @@ class Workshop extends Page implements HasForms, HasTable
                             ->toArray();
                     }),
             ])
-            ->searchable(['name', 'author'])
+            ->searchable(true, ['name', 'author'])
             ->paginated(false);
     }
     
