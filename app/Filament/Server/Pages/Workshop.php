@@ -21,7 +21,6 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\DB;
-use App\Models\ArrayMod;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
@@ -522,6 +521,22 @@ class Workshop extends Page implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
+            ->query(function () {
+                return collect($this->installedMods)
+                    ->map(function ($mod, $index) {
+                        // Add an index as fallback key if id is missing
+                        if (!isset($mod['id'])) {
+                            $mod['id'] = (string)$index;
+                        }
+                        
+                        // Ensure required fields exist
+                        $mod['name'] = $mod['name'] ?? 'Unknown Mod';
+                        $mod['author'] = $mod['author'] ?? 'Unknown Author';
+                        $mod['version'] = $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest';
+                        
+                        return $mod;
+                    });
+            })
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('author'),
@@ -532,13 +547,13 @@ class Workshop extends Page implements HasForms, HasTable
                     ->label('Version')
                     ->color('gray')
                     ->icon('tabler-versions')
-                    ->action(fn ($record) => $this->showVersionSelect($record->id)),
+                    ->action(fn ($record) => $this->showVersionSelect($record['id'])),
                 Action::make('uninstall')
                     ->label('Remove')
                     ->color('danger')
                     ->icon('tabler-trash')
                     ->requiresConfirmation()
-                    ->action(fn ($record) => $this->uninstallMod($record->id)),
+                    ->action(fn ($record) => $this->uninstallMod($record['id'])),
             ])
             ->bulkActions([
                 BulkAction::make('remove')
@@ -548,7 +563,7 @@ class Workshop extends Page implements HasForms, HasTable
                     ->requiresConfirmation()
                     ->action(function (Collection $records): void {
                         // Get all selected mod IDs
-                        $modIds = $records->pluck('id')->toArray();
+                        $modIds = $records->map(fn ($record) => $record['id'])->all();
                         
                         // Get existing mods
                         $workshopVariable = $this->getWorkshopAddonsVariable();
@@ -581,22 +596,6 @@ class Workshop extends Page implements HasForms, HasTable
     }
     
     /**
-     * Get records for the table
-     */
-    public function getTableRecords(): Collection
-    {
-        return collect($this->installedMods)
-            ->map(function ($mod, $index) {
-                $arrayMod = new ArrayMod();
-                $arrayMod->id = $mod['id'] ?? $index;
-                $arrayMod->name = $mod['name'] ?? 'Unknown Mod';
-                $arrayMod->author = $mod['author'] ?? 'Unknown Author';
-                $arrayMod->version = $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest';
-                return $arrayMod;
-            });
-    }
-
-    /**
      * Process data updates from Livewire
      */
     protected function afterUpdated($name, $value): void
@@ -607,13 +606,13 @@ class Workshop extends Page implements HasForms, HasTable
         }
     }
 
-    public function getTableRecordKey($record): string
+    public function getTableRecordKey($record)
     {
-        return $record->id;
+        return $record['id'];
     }
     
     public function getTableRecordTitle($record): string
     {
-        return $record->name;
+        return $record['name'];
     }
 } 
