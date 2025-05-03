@@ -702,13 +702,6 @@ class Workshop extends Page implements HasForms, HasTable
             ->paginated(false)
             ->contentGrid([
                 'md' => 1,
-            ])
-            ->headerActions([
-                \Filament\Tables\Actions\Action::make('refresh')
-                    ->label('Refresh')
-                    ->color('gray')
-                    ->icon('tabler-refresh')
-                    ->action(fn () => $this->loadInstalledMods()),
             ]);
     }
     
