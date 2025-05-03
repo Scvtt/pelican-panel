@@ -512,22 +512,16 @@ class Workshop extends Page implements HasForms, HasTable
     }
     
     /**
-     * Get data for the table
+     * Get records for the table
      */
-    public function getTableQuery()
+    public function getTableRecords()
     {
-        // Create a queryable collection from installedMods
-        // Use \Illuminate\Database\Eloquent\Collection if possible, otherwise use \Illuminate\Support\Collection
-        return collect($this->installedMods);
+        return ArrayMod::hydrate($this->installedMods);
     }
     
-    /**
-     * Configure the table for installed mods
-     */
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn () => ArrayMod::hydrate($this->installedMods))
             ->columns([
                 TextColumn::make('name')
                     ->label('Name')
