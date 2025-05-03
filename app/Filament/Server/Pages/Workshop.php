@@ -631,6 +631,13 @@ class Workshop extends Page implements HasForms, HasTable
                     ->label('Version')
                     ->sortable(),
             ])
+            ->headerActions([
+                \Filament\Tables\Actions\Action::make('refresh')
+                    ->label('Refresh')
+                    ->color('gray')
+                    ->icon('tabler-refresh')
+                    ->action(fn () => $this->loadInstalledMods()),
+            ])
             ->actions([
                 Action::make('version')
                     ->label('Version')
@@ -692,7 +699,10 @@ class Workshop extends Page implements HasForms, HasTable
                     }),
             ])
             ->searchable(true, ['name', 'author'])
-            ->paginated(false);
+            ->paginated(false)
+            ->contentGrid([
+                'md' => 1,
+            ]);
     }
     
     /**

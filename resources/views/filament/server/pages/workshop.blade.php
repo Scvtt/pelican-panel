@@ -20,9 +20,7 @@
         <div class="grid grid-cols-1 gap-6 mt-6">
             @if ($activeTab === 'installed')
                 <!-- Installed Mods Tab -->
-                <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
-                    {{ $this->table }}
-                </div>
+                {{ $this->table }}
             @elseif ($activeTab === 'available')
                 <!-- Available Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
