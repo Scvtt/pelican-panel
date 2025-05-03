@@ -35,6 +35,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
 use Filament\Actions\Action as PageAction;
+use App\Models\ArMod;
 
 class Workshop extends Page implements HasForms, HasTable
 {
@@ -232,6 +233,9 @@ class Workshop extends Page implements HasForms, HasTable
         }
         
         $this->installedMods = $modDetails;
+        
+        // Sync mods with database after loading
+        $this->syncModsWithDatabase();
     }
     
     public function loadTags(): void
@@ -533,11 +537,62 @@ class Workshop extends Page implements HasForms, HasTable
     }
     
     /**
+     * Sync mods for this server with the database
+     */
+    protected function syncModsWithDatabase(): void
+    {
+        /** @var Server $server */
+        $server = Filament::getTenant();
+        
+        // First, update all existing mods to not installed
+        ArMod::where('server_id', $server->id)
+            ->update(['is_installed' => false]);
+        
+        foreach ($this->installedMods as $mod) {
+            // Create or update the mod record
+            ArMod::updateOrCreate(
+                [
+                    'uuid' => $mod['id'],
+                    'server_id' => $server->id,
+                ],
+                [
+                    'name' => $mod['name'] ?? 'Unknown',
+                    'author' => $mod['author'] ?? 'Unknown',
+                    'version' => $mod['version'] ?? null,
+                    'preview_url' => $mod['preview_url'] ?? null,
+                    'tags' => $mod['tags'] ?? [],
+                    'description' => $mod['description'] ?? null,
+                    'is_installed' => true,
+                    'meta' => [
+                        'averageRating' => $mod['averageRating'] ?? 0,
+                        'ratingCount' => $mod['ratingCount'] ?? 0,
+                        'currentVersionNumber' => $mod['currentVersionNumber'] ?? null,
+                    ],
+                ]
+            );
+        }
+    }
+
+    /**
+     * After mods are loaded or modified, sync them with the database
+     */
+    public function updatedInstalledMods(): void
+    {
+        $this->syncModsWithDatabase();
+    }
+
+    /**
      * Get table records
      */
     public function getTableRecords()
     {
-        return collect($this->installedMods);
+        // Get records from the database for the current server
+        /** @var Server $server */
+        $server = Filament::getTenant();
+        
+        return ArMod::where('server_id', $server->id)
+            ->where('is_installed', true)
+            ->get();
     }
 
     /**
@@ -548,16 +603,19 @@ class Workshop extends Page implements HasForms, HasTable
      */
     public function getTableRecordKey($record): string
     {
-        // Extract ID from array record
-        return (string)($record['id'] ?? uniqid());
+        // For ArMod models, return the UUID
+        if ($record instanceof ArMod) {
+            return $record->uuid;
+        }
+        
+        // For arrays, return the ID
+        return (string)($record['id'] ?? $record['uuid'] ?? uniqid());
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(function () {
-                return $this->getTableRecords();
-            })
+            ->query(fn () => $this->getTableRecords())
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('author'),
@@ -568,13 +626,13 @@ class Workshop extends Page implements HasForms, HasTable
                     ->label('Version')
                     ->color('gray')
                     ->icon('tabler-versions')
-                    ->action(fn ($record) => $this->showVersionSelect($record['id'])),
+                    ->action(fn (ArMod $record) => $this->showVersionSelect($record->uuid)),
                 Action::make('uninstall')
                     ->label('Remove')
                     ->color('danger')
                     ->icon('tabler-trash')
                     ->requiresConfirmation()
-                    ->action(fn ($record) => $this->uninstallMod($record['id'])),
+                    ->action(fn (ArMod $record) => $this->uninstallMod($record->uuid)),
             ])
             ->bulkActions([
                 BulkAction::make('remove')
@@ -583,8 +641,8 @@ class Workshop extends Page implements HasForms, HasTable
                     ->icon('tabler-trash')
                     ->requiresConfirmation()
                     ->action(function (Collection $records): void {
-                        // Get all selected mod IDs
-                        $modIds = $records->map(fn ($record) => $record['id'])->all();
+                        // Get all selected mod UUIDs
+                        $modIds = $records->pluck('uuid')->all();
                         
                         // Get existing mods
                         $workshopVariable = $this->getWorkshopAddonsVariable();

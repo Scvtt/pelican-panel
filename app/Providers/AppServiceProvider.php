@@ -47,6 +47,7 @@ use Laravel\Sanctum\Sanctum;
 use Livewire\Component;
 use Livewire\Livewire;
 use Spatie\Health\Facades\Health;
+use App\Providers\AuthServiceProvider;
 
 use function Livewire\on;
 use function Livewire\store;
@@ -213,5 +214,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         Scramble::ignoreDefaultRoutes();
+        
+        // Register the AuthServiceProvider
+        $this->app->register(AuthServiceProvider::class);
     }
 }
