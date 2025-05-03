@@ -21,64 +21,79 @@
             @if ($activeTab === 'installed')
                 <!-- Installed Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
-                    <div class="flex items-center justify-between mb-5">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Installed Mods</h3>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                            This feature is experimental, if you remove all mods you will need to clear your config.json file.
-                        </div>
-                    </div>
-                    
                     @if (count($installedMods) > 0)
-                        <div class="overflow-x-auto">
-                            <table class="w-full border-collapse">
-                                <thead>
-                                    <tr class="border-b border-gray-200 dark:border-gray-700">
-                                        <th class="py-2 px-4 text-left text-gray-900 dark:text-white">Name</th>
-                                        <th class="py-2 px-4 text-left text-gray-900 dark:text-white">Author</th>
-                                        <th class="py-2 px-4 text-left text-gray-900 dark:text-white">Version</th>
-                                        <th class="py-2 px-4 text-left text-gray-900 dark:text-white">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($installedMods as $mod)
-                                        <tr class="border-b border-gray-200 dark:border-gray-700">
-                                            <td class="py-2 px-4 text-gray-700 dark:text-gray-300">
-                                                {{ $mod['name'] ?? 'Unknown Mod' }}
-                                            </td>
-                                            <td class="py-2 px-4 text-gray-700 dark:text-gray-300">
-                                                {{ $mod['author'] ?? 'Unknown Author' }}
-                                            </td>
-                                            <td class="py-2 px-4 text-gray-700 dark:text-gray-300">
-                                                {{ $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest' }}
-                                            </td>
-                                            <td class="py-2 px-4">
-                                                <div class="flex space-x-2">
-                                                    <x-filament::button
-                                                        type="button"
-                                                        wire:click="showVersionSelect('{{ $mod['id'] }}')"
-                                                        color="gray"
-                                                        size="sm"
-                                                        icon="tabler-versions"
-                                                    >
-                                                        Version
-                                                    </x-filament::button>
-                                                    
-                                                    <x-filament::button
-                                                        type="button" 
-                                                        wire:click="uninstallMod('{{ $mod['id'] }}')"
-                                                        color="danger"
-                                                        size="sm"
-                                                        icon="tabler-trash"
-                                                    >
-                                                        Remove
-                                                    </x-filament::button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                        <x-filament::table>
+                            <x-slot name="header">
+                                <x-filament::table.header-cell>
+                                    @if(count($installedMods) > 0)
+                                        <div class="px-3 py-4">
+                                            <x-filament::button
+                                                type="button" 
+                                                wire:click="bulkUninstallConfirm"
+                                                color="danger"
+                                                size="sm"
+                                                icon="tabler-trash"
+                                                class="mr-2"
+                                            >
+                                                Remove All
+                                            </x-filament::button>
+                                        </div>
+                                    @endif
+                                </x-filament::table.header-cell>
+                            </x-slot>
+                            
+                            <x-slot name="headers">
+                                <x-filament::table.header-cell>
+                                    Name
+                                </x-filament::table.header-cell>
+                                <x-filament::table.header-cell>
+                                    Author
+                                </x-filament::table.header-cell>
+                                <x-filament::table.header-cell>
+                                    Version
+                                </x-filament::table.header-cell>
+                                <x-filament::table.header-cell>
+                                    Actions
+                                </x-filament::table.header-cell>
+                            </x-slot>
+                            
+                            @foreach ($installedMods as $mod)
+                                <x-filament::table.row wire:key="mod-{{ $mod['id'] }}">
+                                    <x-filament::table.cell>
+                                        {{ $mod['name'] ?? 'Unknown Mod' }}
+                                    </x-filament::table.cell>
+                                    <x-filament::table.cell>
+                                        {{ $mod['author'] ?? 'Unknown Author' }}
+                                    </x-filament::table.cell>
+                                    <x-filament::table.cell>
+                                        {{ $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest' }}
+                                    </x-filament::table.cell>
+                                    <x-filament::table.cell>
+                                        <div class="flex space-x-2">
+                                            <x-filament::button
+                                                type="button"
+                                                wire:click="showVersionSelect('{{ $mod['id'] }}')"
+                                                color="gray"
+                                                size="sm"
+                                                icon="tabler-versions"
+                                            >
+                                                Version
+                                            </x-filament::button>
+                                            
+                                            <x-filament::button
+                                                type="button" 
+                                                wire:click="uninstallMod('{{ $mod['id'] }}')"
+                                                color="danger"
+                                                size="sm"
+                                                icon="tabler-trash"
+                                            >
+                                                Remove
+                                            </x-filament::button>
+                                        </div>
+                                    </x-filament::table.cell>
+                                </x-filament::table.row>
+                            @endforeach
+                        </x-filament::table>
                     @else
                         <div class="py-4 text-center text-gray-500 dark:text-gray-400">
                             No mods are currently installed. Browse available mods below to add them.
@@ -89,28 +104,26 @@
                 <!-- Available Mods Tab -->
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
                     <div class="flex items-center justify-between mb-5">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Available Mods</h3>
-                        <div class="flex space-x-2 items-center">
-                            <div class="relative w-60">
-                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <svg wire:loading.remove.delay.default="1" wire:target="searchTerm" class="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    
-                                    <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="hidden animate-spin h-5 w-5 text-gray-400 dark:text-gray-500" wire:loading.delay.default="" wire:target="searchTerm">
-                                        <path clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill-rule="evenodd" fill="currentColor" opacity="0.2"></path>
-                                        <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"></path>
-                                    </svg>
-                                </div>
-                                <input 
-                                    class="h-10 w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 pl-12 pr-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50"
-                                    autocomplete="off" 
-                                    placeholder="Search mods..." 
-                                    type="text" 
-                                    wire:model.live.debounce.300ms="searchTerm" 
-                                />
+                        <div class="relative w-60">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <svg wire:loading.remove.delay.default="1" wire:target="searchTerm" class="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd"></path>
+                                </svg>
+                                
+                                <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="hidden animate-spin h-5 w-5 text-gray-400 dark:text-gray-500" wire:loading.delay.default="" wire:target="searchTerm">
+                                    <path clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill-rule="evenodd" fill="currentColor" opacity="0.2"></path>
+                                    <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"></path>
+                                </svg>
                             </div>
-                            
+                            <input 
+                                class="h-10 w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 pl-12 pr-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50"
+                                autocomplete="off" 
+                                placeholder="Search mods..." 
+                                type="text" 
+                                wire:model.live.debounce.300ms="searchTerm" 
+                            />
+                        </div>
+                        <div class="flex space-x-2 items-center">
                             <select 
                                 wire:model.live="currentSort"
                                 class="h-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 px-3 py-2"
@@ -352,6 +365,39 @@
                 <x-filament::button
                     color="gray"
                     x-on:click="$dispatch('close-modal', { id: 'version-selector' })"
+                >
+                    Cancel
+                </x-filament::button>
+            </x-slot>
+        </x-filament::modal>
+        
+        <!-- Bulk Uninstall Confirmation Modal -->
+        <x-filament::modal id="confirm-bulk-uninstall" width="md">
+            <x-slot name="heading">
+                Remove All Mods
+            </x-slot>
+            
+            <x-slot name="description">
+                Are you sure you want to remove all installed mods? This action cannot be undone.
+            </x-slot>
+            
+            <div class="space-y-4">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    This will remove all mods from your server. If you're experiencing issues with mods, this can help reset your configuration.
+                </div>
+            </div>
+            
+            <x-slot name="footerActions">
+                <x-filament::button
+                    color="danger"
+                    wire:click="bulkUninstallMods"
+                >
+                    Yes, Remove All
+                </x-filament::button>
+
+                <x-filament::button
+                    color="gray"
+                    x-on:click="$dispatch('close-modal', { id: 'confirm-bulk-uninstall' })"
                 >
                     Cancel
                 </x-filament::button>

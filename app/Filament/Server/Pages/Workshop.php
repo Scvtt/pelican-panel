@@ -448,4 +448,31 @@ class Workshop extends Page implements HasForms
         $this->currentPage = 1; // Reset to first page when search changes
         $this->loadMods();
     }
+    
+    public function bulkUninstallConfirm(): void
+    {
+        $this->dispatch('open-modal', id: 'confirm-bulk-uninstall');
+    }
+    
+    public function bulkUninstallMods(): void
+    {
+        $workshopVariable = $this->getWorkshopAddonsVariable();
+        if (!$workshopVariable) {
+            return;
+        }
+        
+        // Clear all mods by saving an empty array
+        $this->saveWorkshopAddons([]);
+        $this->loadInstalledMods();
+        
+        // Show success notification
+        Notification::make()
+            ->success()
+            ->title('All Mods Removed')
+            ->body('All mods have been successfully uninstalled')
+            ->send();
+            
+        // Close the modal
+        $this->dispatch('close-modal', id: 'confirm-bulk-uninstall');
+    }
 } 
