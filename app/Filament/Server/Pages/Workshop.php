@@ -512,89 +512,10 @@ class Workshop extends Page implements HasForms, HasTable
     }
     
     /**
-     * Get records for the table
+     * Get records for the table - this is used by the Blade template directly
      */
-    public function getTableRecords(): array|\Illuminate\Database\Eloquent\Collection|\Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection
+    public function getInstalledMods()
     {
-        return ArrayMod::hydrate($this->installedMods);
-    }
-    
-    public function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Name')
-                    ->getStateUsing(fn ($record) => $record['name'] ?? 'Unknown Mod')
-                    ->searchable(),
-                TextColumn::make('author')
-                    ->label('Author')
-                    ->getStateUsing(fn ($record) => $record['author'] ?? 'Unknown Author')
-                    ->searchable(),
-                TextColumn::make('version')
-                    ->label('Version')
-                    ->getStateUsing(fn ($record) => $record['version'] ?? $record['currentVersionNumber'] ?? 'Latest'),
-            ])
-            ->actions([
-                Action::make('version')
-                    ->label('Version')
-                    ->icon('tabler-versions')
-                    ->button()
-                    ->color('gray')
-                    ->action(fn ($record) => $this->showVersionSelect($record['id'])),
-                Action::make('uninstall')
-                    ->label('Remove')
-                    ->icon('tabler-trash')
-                    ->button()
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->action(fn ($record) => $this->uninstallMod($record['id'])),
-            ])
-            ->bulkActions([
-                BulkAction::make('remove')
-                    ->label('Remove Selected')
-                    ->icon('tabler-trash')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->deselectRecordsAfterCompletion()
-                    ->action(function (Collection $records) {
-                        // Get IDs of selected mods
-                        $modIds = $records->pluck('id')->toArray();
-                        if (empty($modIds)) {
-                            return;
-                        }
-                        $workshopVariable = $this->getWorkshopAddonsVariable();
-                        if (!$workshopVariable) {
-                            return;
-                        }
-                        $modService = app(ReforgerModService::class);
-                        $existingMods = $modService->parseWorkshopAddons($workshopVariable->variable_value);
-                        $filteredMods = array_filter($existingMods, function ($mod) use ($modIds) {
-                            return !in_array($mod['id'], $modIds);
-                        });
-                        $this->saveWorkshopAddons($filteredMods);
-                        $this->loadInstalledMods();
-                        $count = count($modIds);
-                        Notification::make()
-                            ->success()
-                            ->title($count > 1 ? "$count Mods Removed" : "Mod Removed")
-                            ->body($count > 1 ? "Selected mods have been successfully uninstalled" : "Selected mod has been successfully uninstalled")
-                            ->send();
-                    }),
-            ])
-            ->emptyStateHeading('No mods installed')
-            ->emptyStateDescription('Browse available mods to add them to your server.')
-            ->paginated(false);
-    }
-
-    /**
-     * Process data updates from Livewire
-     */
-    protected function afterUpdated($name, $value): void
-    {
-        // If the installed mods changed, make sure the table data is fresh
-        if ($name === 'installedMods') {
-            $this->resetTable();
-        }
+        return $this->installedMods;
     }
 } 

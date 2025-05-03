@@ -23,7 +23,49 @@
                 <div class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
                     @if (count($installedMods) > 0)
                         <div class="mt-1">
-                            {{ $this->table }}
+                            <!-- Basic HTML table instead of Filament table -->
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Name</th>
+                                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Author</th>
+                                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Version</th>
+                                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-500 dark:text-gray-400">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($installedMods as $mod)
+                                            <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $mod['name'] ?? 'Unknown Mod' }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $mod['author'] ?? 'Unknown Author' }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $mod['version'] ?? $mod['currentVersionNumber'] ?? 'Latest' }}</td>
+                                                <td class="px-4 py-3 text-sm text-right space-x-2">
+                                                    <x-filament::button
+                                                        type="button"
+                                                        wire:click="showVersionSelect('{{ $mod['id'] }}')"
+                                                        color="gray"
+                                                        size="sm"
+                                                        icon="tabler-versions"
+                                                    >
+                                                        Version
+                                                    </x-filament::button>
+                                                    
+                                                    <x-filament::button
+                                                        type="button"
+                                                        wire:click="uninstallMod('{{ $mod['id'] }}')"
+                                                        color="danger"
+                                                        size="sm"
+                                                        icon="tabler-trash"
+                                                    >
+                                                        Remove
+                                                    </x-filament::button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     @else
                         <div class="py-4 text-center text-gray-500 dark:text-gray-400">
